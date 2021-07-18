@@ -27,6 +27,14 @@
 
 export default {
   name: "Home",
+	title() {
+		return this.title
+	},
+	data() {
+		return {
+			title : "My Home"
+		}
+	},
   methods: {
     toastTest1() {
       this.$toast.info("안내 입니다.");
