@@ -6,6 +6,10 @@ Vue.use(Vuex)
 export function createStore() {
 	const store = new Vuex.Store({
 		state: {
+			config: {
+				title : "ezCode Home",
+				footer: "ezCode all right reserved.",
+			}
 		},
 		mutations: {
 		},

@@ -28,32 +28,12 @@
 export default {
   name: "Home",
 	title() {
-		console.log("Home.vue title-mixin");
 		return this.title
 	},
 	data() {
 		return {
 			title : "My Home"
 		}
-	},
-	beforeCreate() {
-		console.log('Home.vue beforeCreate');
-	},
-	created() {
-		console.log('Home.vue created', this.$ssrContext);
-	},
-	beforeMount() {
-		console.log('Home.vue beforeMount')
-	},
-	mounted() {
-		console.log('Home.vue mounted')
-	},
-	serverPrefetch() {
-		console.log('Home.vue serverPrefetch');
-		return new Promise((resolve, reject)=>{
-			console.log('Home.vue serverPrefetch Promise');
-			resolve();
-		});
 	},
   methods: {
     toastTest1() {
