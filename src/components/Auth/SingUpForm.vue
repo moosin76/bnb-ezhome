@@ -51,7 +51,6 @@ export default {
 			this.$refs.form.validate();
 			await this.$nextTick();
 			if(!this.valid) return;
-			console.log(this.$refs.id.validate());
 			if(!this.$refs.id.validate()) return;
 			console.log(this.form);
 		}
