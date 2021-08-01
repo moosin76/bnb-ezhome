@@ -12,14 +12,16 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
 import SingUpForm from "../../components/Auth/SingUpForm.vue";
 export default {
   components: { SingUpForm },
   name: "Join",
 	methods :{
+		...mapActions('user', ['duplicateCheck']),
 		async checkId(id) {
-			console.log("id", id);
-			return {cnt : 0}
+			const data = await this.duplicateCheck({field: 'mb_id', value: id});
+			return data;
 		}
 	}
 };
