@@ -21,23 +21,30 @@
       label="비밀번호"
       prepend-icon="mdi-lock"
       v-model="form.mb_password"
-			:rules="rules.password()"
+      :rules="rules.password()"
     />
 
-		<input-password
+    <input-password
       label="비밀번호 확인"
       prepend-icon="mdi-lock-check"
       v-model="confimPw"
-			:rules="[rules.matchValue(form.mb_password)]"
+      :rules="[rules.matchValue(form.mb_password)]"
     />
 
-		<input-duplicate-check
+    <input-duplicate-check
       ref="email"
       label="이메일"
       prepend-icon="mdi-email"
       v-model="form.mb_email"
       :rules="rules.email()"
       :cbCheck="cbCheckEmail"
+    />
+
+    <input-date
+      v-model="form.mb_birth"
+      label="생년월일"
+      prepend-icon="mdi-calendar"
+			:rules="rules.date({label:'생년월일'})"
     />
 
     <v-btn type="submit" block color="primary">회원가입</v-btn>
@@ -48,15 +55,17 @@
 import InputDuplicateCheck from "../InputForms/InputDuplicateCheck.vue";
 import validateRules from "../../../util/validateRules";
 import InputPassword from "../InputForms/InputPassword.vue";
+import InputDate from "../InputForms/InputDate.vue";
+
 export default {
-  components: { InputDuplicateCheck, InputPassword },
+  components: { InputDuplicateCheck, InputPassword, InputDate },
   name: "SignUpForm",
   props: {
     cbCheckId: {
       type: Function,
       default: null,
     },
-		cbCheckEmail: {
+    cbCheckEmail: {
       type: Function,
       default: null,
     },
@@ -65,18 +74,18 @@ export default {
     return {
       valid: true,
       form: {
-        mb_id: "",
-        mb_password: "",
-        mb_name: "",
+        mb_id: "test",
+        mb_password: "abcd1234",
+        mb_name: "테스트",
         mb_birth: "",
         mb_gender: "",
-        mb_email: "",
+        mb_email: "test@test.com",
         mb_phone: "",
         mb_zip: "",
         mb_addr1: "",
         mb_addr2: "",
       },
-			confimPw : "",
+      confimPw: "abcd1234",
     };
   },
   computed: {
@@ -89,7 +98,7 @@ export default {
       await this.$nextTick();
       if (!this.valid) return;
       if (!this.$refs.id.validate()) return;
-			if (!this.$refs.email.validate()) return;
+      if (!this.$refs.email.validate()) return;
       console.log(this.form);
     },
   },

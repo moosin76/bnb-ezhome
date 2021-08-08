@@ -77,6 +77,21 @@ const rules = {
 		ruleArr.push(rules.pattern(opt));
 		return ruleArr;
 	},
+	date(options) {
+		const defaultOptions = {
+			label : "날자",
+			info : 'YYYY-MM-DD 형식에 맞게 입력하세요',
+			required: true,
+			pattern : /^\d{4}-\d{2}-\d{2}$/
+		};
+		const opt = Object.assign(defaultOptions, options);
+		const ruleArr= [];
+		if(opt.required) {
+			ruleArr.push(rules.require(opt));
+		}
+		ruleArr.push(rules.pattern(opt));
+		return ruleArr;
+	},
 }
 
 module.exports = rules;
