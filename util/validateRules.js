@@ -92,6 +92,21 @@ const rules = {
 		ruleArr.push(rules.pattern(opt));
 		return ruleArr;
 	},
+	phone(options) {
+		const defaultOptions = {
+			label : "전화번호",
+			info : null,
+			required: true,
+			pattern : /^(\d{2,3}-)?\d{3,4}-\d{4}$/
+		};
+		const opt = Object.assign(defaultOptions, options);
+		const ruleArr= [];
+		if(opt.required) {
+			ruleArr.push(rules.require(opt));
+		}
+		ruleArr.push(rules.pattern(opt));
+		return ruleArr;
+	},
 }
 
 module.exports = rules;
