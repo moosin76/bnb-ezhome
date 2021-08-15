@@ -13,6 +13,7 @@
         />
       </v-card-text>
     </v-card>
+		
   </div>
 </template>
 
@@ -29,7 +30,7 @@ export default {
 		}
 	},
   methods: {
-    ...mapActions("user", ["duplicateCheck"]),
+    ...mapActions("user", ["duplicateCheck", "createMember"]),
     async checkId(id) {
       const data = await this.duplicateCheck({ field: "mb_id", value: id });
       return data;
@@ -43,10 +44,12 @@ export default {
     },
     async save(form) {
       this.isLoading = true;
-			
-			setTimeout(()=>{
-				this.isLoading = false;
-			}, 1000)
+			const data = await this.createMember(form);
+			this.isLoading = false;
+			if(data) {
+				this.$toast.info(`${form.mb_name}님 회원가입 하셧습니다.`);
+				this.$router.push('/login');
+			}
     },
   },
 };
