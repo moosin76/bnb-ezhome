@@ -47,7 +47,8 @@ export default {
 			const data = await this.createMember(form);
 			this.isLoading = false;
 			if(data) {
-				this.$toast.info(`${form.mb_name}님 회원가입 하셧습니다.`);
+				const mb_name = form.get('mb_name');
+				this.$toast.info(`${mb_name}님 회원가입 하셧습니다.`);
 				this.$router.push('/login');
 			}
     },

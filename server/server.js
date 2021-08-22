@@ -9,13 +9,35 @@ const app = express();
 const port = process.env.VUE_APP_SERVER_PORT || 3000;
 const webServer = http.createServer(app);
 
+// 파비콘
+app.use((req, res, next)=>{
+	if(req.path.indexOf('favicon.ico') > -1) {
+		const favicon = fs.readFileSync(path.join(__dirname, '../dist/favicon.ico'));
+		res.status(200).end(favicon);
+		return;
+	}
+	next();
+});
+
 // 파서
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+const fileUpload = require('express-fileupload');
+app.use(fileUpload());
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
+// 글로벌 
+global.MEMBER_PHOTO_PATH = path.join(__dirname, './upload/memberPhoto');
+fs.mkdirSync(MEMBER_PHOTO_PATH, {recursive: true});
 
 // Passport
 const passport = require('./plugins/passport');
 passport(app);
+
+// 멤버이미지 
+const thumbnail = require('./plugins/thumbnail');
+app.use('/upload/:_path', thumbnail(path.join(__dirname, './upload')));
 
 // 정적 폴더
 app.use(express.static(path.join(__dirname, "../dist")));

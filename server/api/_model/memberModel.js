@@ -7,6 +7,8 @@ const { LV } = require('../../../util/level');
 const moment = require('../../../util/moment');
 const { getIp } = require('../../../util/lib');
 
+
+
 function clearMemberField(member) {
 	delete member.mb_password;
 	member.mb_create_at = moment(member.mb_create_at).format('LT');
@@ -52,7 +54,7 @@ const memberModel = {
 	},
 	async createMember(req) {
 		// console.log("createMember", req.body);
-
+		// console.log("Image", req.files);
 		const at = moment().format('LT');
 		const ip = getIp(req);
 		// console.log('IP', ip, at);
@@ -66,6 +68,17 @@ const memberModel = {
 			mb_update_at: at,
 			mb_update_ip: ip,
 		};
+		// 이미지 업로드 처리
+		delete payload.mb_image;
+		if(req.files && req.files.mb_image) {
+			console.log(MEMBER_PHOTO_PATH);
+			req.files.mb_image.mv(`${MEMBER_PHOTO_PATH}/${payload.mb_id}.jpg`,(err)=>{
+				if(err) {
+					console.log("Member image upload error", err);
+				}
+			});
+		} 
+		
 		payload.mb_password = jwt.generatePassword(payload.mb_password);
 		const sql = sqlHelper.Insert(TABLE.MEMBER, payload);
 		const [row] = await db.execute(sql.query, sql.values);

@@ -47,6 +47,13 @@
       :rules="rules.date({ label: '생년월일' })"
     />
 
+    <v-file-input
+      label="회원이미지"
+      v-model="form.mb_image"
+      prepend-icon="mdi-account-box"
+			accept="image/jpg,image/png"
+    />
+
     <input-radio
       v-model="form.mb_gender"
       :items="genderItems"
@@ -68,8 +75,8 @@
     />
 
     <v-btn type="submit" block color="primary" :loading="isLoading">
-			회원가입
-		</v-btn>
+      회원가입
+    </v-btn>
   </v-form>
 </template>
 
@@ -93,10 +100,10 @@ export default {
   },
   name: "SignUpForm",
   props: {
-		isLoading : {
-			type: Boolean,
-			required : true,
-		},
+    isLoading: {
+      type: Boolean,
+      required: true,
+    },
     cbCheckId: {
       type: Function,
       default: null,
@@ -110,23 +117,23 @@ export default {
     return {
       valid: true,
       form: {
-        mb_id: "test",
+        mb_id: "test4",
         mb_password: "abcd1234",
         mb_name: "테스트",
         mb_birth: "2020-08-03",
         mb_gender: "M",
-        mb_email: "test@test.com",
+        mb_email: "test4@test.com",
         mb_phone: "010-1111-1111",
         mb_zip: "42957",
         mb_addr1: "부산 금정구 청룡예전로 1 (청룡동)",
         mb_addr2: "5층",
+        mb_image: null,
       },
       genderItems: [
         { label: "남자", value: "M" },
         { label: "여자", value: "F" },
       ],
       confimPw: "abcd1234",
-			
     };
   },
   computed: {
@@ -140,7 +147,14 @@ export default {
       if (!this.valid) return;
       if (!this.$refs.id.validate()) return;
       if (!this.$refs.email.validate()) return;
-      this.$emit("onSave", this.form);
+      // console.log(this.mb_image);
+      // this.$emit("onSave", this.form);
+      const formData = new FormData();
+      const keys = Object.keys(this.form);
+      for (const key of keys) {
+        formData.append(key, this.form[key]);
+      }
+      this.$emit("onSave", formData);
     },
   },
 };

@@ -17,7 +17,9 @@ const token = {
 		return randToken.generate(len);
 	},
 	generatePassword(passwrod) {
-		return crypto.pbkdf2Sync(passwrod, SECRET_KEY, 10, 64, 'sha512').toString('base64');
+		return crypto.pbkdf2Sync(
+			passwrod, SECRET_KEY, 10, 64, 'sha512'
+			).toString('base64');
 	},
 	getToken(user) {
 		const payload = {
