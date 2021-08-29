@@ -30,14 +30,14 @@ router.post('/loginLocal', async (req, res) => {
 					const data = memberModel.loginMember(req);
 					member.mb_login_at = data.mb_login_at;
 					member.mb_login_ip = data.mb_login_ip;
-					// 이미지 있는지 확인
-					if(fs.existsSync(`${MEMBER_PHOTO_PATH}/${member.mb_id}.jpg`)) {
-						member.mb_image = true;
-					}
 					res.json({ member, token });
 				}
 			})
 		}
 	})(req, res);
+});
+
+router.get('/auth', (req, res)=> {
+	res.json(req.user || false);
 })
 module.exports = router;
