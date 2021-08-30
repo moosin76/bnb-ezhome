@@ -41,6 +41,13 @@ export const actions = {
 			commit('SET_MEMBER', data.member);
 			VueCookies.set('token', data.token);
 		}
-		return data;
+		return !!data;
+	},
+	async signOut ({commit, state}) {
+		const mb_name = state.member.mb_name;
+		// console.log('mb_name', mb_name);
+		commit('SET_MEMBER', null);
+		VueCookies.remove('token');
+		return mb_name;
 	}
 }

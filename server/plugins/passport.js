@@ -29,36 +29,53 @@ module.exports = (app) => {
 	passport.use(new JWTStategy(
 		{
 			// jwtFromRequest: ExtractJwt.fromHeader('authorization'),
-			jwtFromRequest : ExtractJwt.fromAuthHeaderAsBearerToken(),
+			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
 			secretOrKey: SECRET_KEY,
 		},
 		async (payload, done) => {
 			try {
-				const {mb_id} = payload;
+				const { mb_id } = payload;
 				const member = await memberModel.getMemberBy({ mb_id });
-				if(!member)  {
+				if (!member) {
 					throw new Error('회원 토큰이 유효하지 않습니다.');
 				}
 				return done(null, member);
-			} catch(e) {
+			} catch (e) {
 				return done(e);
 			}
 		}
 	));
 
-	app.use((req, res, next)=> {
-		passport.authenticate('jwt', (err, user)=> {
-			if(user) {
-				// 로그인
-				console.log("user1", user);
-				req.login(user, {session : false}, (err) => {});
-			} else {
-				// 로그아웃
-				try{
-					req.logout();
-				} catch(e){}
-			}
+	app.use(async (req, res, next) => {
+		if (req.headers.authorization) {
+			passport.authenticate('jwt', (err, user) => {
+				if (user) {
+					// 로그인
+					// console.log("user1", user);
+					req.login(user, { session: false }, (err) => { });
+				} else {
+					// 로그아웃
+					try {
+						req.logout();
+					} catch (e) { }
+				}
+				next();
+			})(req, res, next);
+		} else if (req.cookies.token) {
+			try {
+				// 인증
+				const payload = jwt.verify(req.cookies.token);
+				// console.log("payload", payload)
+				const { mb_id } = payload;
+				const member = await memberModel.getMemberBy({ mb_id });
+				if (!member) {
+					throw new Error('회원 토큰이 유효하지 않습니다.');
+				}
+				req.login(member, { session: false }, (err) => { });
+			} catch(e) {}
 			next();
-		})(req, res, next);
+		} else {
+			next();
+		}
 	});
 }

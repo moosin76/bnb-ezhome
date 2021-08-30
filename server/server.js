@@ -73,11 +73,12 @@ app.get('*', (req, res) => {
 		clientManifest
 	});
 	// console.log(process.memoryUsage());
-
+	// console.log("user", req.user);
 	const ctx = {
 		url : req.url,
 		title : "Vue SSR App",
 		metas : `<!-- inject more metas -->`,
+		member : req.user
 	};
 	const stream = renderer.renderToStream(ctx);
 	stream.on('end', ()=>{

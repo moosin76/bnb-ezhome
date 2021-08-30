@@ -23,7 +23,7 @@ const _axios = axios.create(config);
 _axios.interceptors.request.use(
 	function (config) {
 		// 토큰이 있으면 토큰을 해더에 넣어 보낸다.
-		if(VueCookies.isKey('token')) {
+		if(typeof(window) == 'object' &&  VueCookies.isKey('token')) {
 			// config.headers.Authorization = VueCookies.get('token');
 			config.headers.Authorization = 'Bearer ' + VueCookies.get('token');
 		}
