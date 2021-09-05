@@ -44,6 +44,6 @@ export default {
 		toggleDrawer() {
 			this.drawer = !this.drawer;
 		}
-	}
+	},
 };
 </script>

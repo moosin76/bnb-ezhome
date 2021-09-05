@@ -70,10 +70,11 @@ const store = new Vuex.Store({
 		}
 	},
 	actions: {
-		async appInit({dispatch, commit}, member) {
+		async appInit({dispatch, commit}, ctx) {
 			// 사이트 설정을 가지고 올꺼고
-			if(member) {
-				commit('user/SET_MEMBER', member);
+			if(ctx) {
+				commit('user/SET_MEMBER', ctx.member);
+				commit('user/SET_TOKEN', ctx.token);
 			} else {
 				await dispatch('user/initUser');
 			}

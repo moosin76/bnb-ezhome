@@ -30,6 +30,7 @@ router.post('/loginLocal', async (req, res) => {
 					const data = memberModel.loginMember(req);
 					member.mb_login_at = data.mb_login_at;
 					member.mb_login_ip = data.mb_login_ip;
+					res.cookie('token', token, { httpOnly: true });
 					res.json({ member, token });
 				}
 			})
@@ -37,7 +38,17 @@ router.post('/loginLocal', async (req, res) => {
 	})(req, res);
 });
 
-router.get('/auth', (req, res)=> {
-	res.json(req.user || false);
+// 인증
+router.get('/auth', (req, res) => {
+	const member = req.user || null;
+	const token = req.cookies.token || null;
+	res.json({ member, token });
 })
+
+// 로그아웃
+router.get('/signOut', (req, res)=>{
+	res.clearCookie('token');
+	res.json(true);
+});
+
 module.exports = router;
