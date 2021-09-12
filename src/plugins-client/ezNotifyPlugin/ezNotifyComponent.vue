@@ -9,7 +9,7 @@
           <v-icon class="mr-4" large :color="options.iconColor">
             {{ options.icon }}
           </v-icon>
-          {{ content }}
+          <span v-html="content"></span>
         </div>
         <v-form
           v-if="options.type === 'prompt'"

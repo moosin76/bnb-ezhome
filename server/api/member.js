@@ -3,8 +3,6 @@ const passport = require('passport');
 const { modelCall } = require('../../util/lib');
 const memberModel = require('./_model/memberModel');
 const jwt = require('../plugins/jwt');
-const fs = require('fs');
-
 
 router.get('/duplicateCheck/:field/:value', async (req, res) => {
 	const result = await modelCall(memberModel.duplicateCheck, req.params);
@@ -50,5 +48,36 @@ router.get('/signOut', (req, res)=>{
 	res.clearCookie('token');
 	res.json(true);
 });
+
+// 아이디 찾기
+router.get('/findId', async(req, res)=>{
+	const result = await modelCall(memberModel.findId, req.query);
+	res.json(result);
+});
+
+// 비밀번호 찾기
+router.get('/findPw', async(req, res)=>{
+	const result = await modelCall(memberModel.findPw, req);
+	res.json(result);
+});
+
+// 비밀번호 수정
+router.patch('/modifyPassword', async(req, res)=>{
+	const result = await modelCall(memberModel.modifyPassword, req.body);
+	res.json(result);
+})
+
+// 구글 로그인 요청
+router.get('/loginGoogle', passport.authenticate("google", { scope: ["email", "profile"] }));
+
+// 구글 로그인 콜백
+router.get('/google-callback',  (req, res)=>{
+	passport.authenticate('google', async function (err, member) {
+		// console.log("member",member);
+		// console.log("err", err);
+		const result = await modelCall(memberModel.googleCallback, req, res,  err, member);
+		res.end(result);
+	})(req, res);
+})
 
 module.exports = router;

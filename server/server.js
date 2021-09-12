@@ -9,6 +9,10 @@ const app = express();
 const port = process.env.VUE_APP_SERVER_PORT || 3000;
 const webServer = http.createServer(app);
 
+// cors
+// const cors = require('cors');
+// app.use(cors())
+
 let isDisableKeepAlive = false;
 app.use((req, res, next)=>{
 	if(isDisableKeepAlive) {

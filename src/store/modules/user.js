@@ -1,5 +1,5 @@
 import Vue from "vue";
-import VueCookies from 'vue-cookies';
+import qs from 'qs';
 
 export const state = () => ({
 	member: null,
@@ -56,5 +56,22 @@ export const actions = {
 		commit('SET_TOKEN', null);
 		// VueCookies.remove('token');
 		return mb_name;
+	},
+	async findIdLocal(ctx, form) {
+		const {$axios} = Vue.prototype;
+		const query = qs.stringify(form);
+		const data = await $axios.get(`/api/member/findId?${query}`);
+		return data;
+	},
+	async findPwLocal(ctx, form) {
+		const {$axios} = Vue.prototype;
+		const query = qs.stringify(form);
+		const data = await $axios.get(`/api/member/findPw?${query}`);
+		return data;
+	},
+	async modifyPassword(ctx, form) {
+		const {$axios} = Vue.prototype;
+		const data = await $axios.patch(`/api/member/modifyPassword`, form);
+		return data;
 	}
 }

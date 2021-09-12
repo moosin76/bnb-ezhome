@@ -5,7 +5,6 @@ export default (ctx) => {
 		const { app, router, store } = createApp(ctx);
 		// console.log(ctx);
 		await store.dispatch('appInit', ctx);
-
 		
 		router.push(ctx.url);
 		
