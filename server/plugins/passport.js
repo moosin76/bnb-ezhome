@@ -7,7 +7,7 @@ const GoogleStrategy = require('passport-google-oauth2').Strategy;
 
 const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, DEV_ENV, VUE_APP_SERVER_PORT, DB_HOST } = process.env;
 const CALLBACK_URL = DEV_ENV=='DEV' ? `http://localhost:${VUE_APP_SERVER_PORT}` : `https://${DB_HOST}`; 
-console.log(CALLBACK_URL);
+console.log('callbakc url ', CALLBACK_URL);
 
 module.exports = (app) => {
 	app.use(passport.initialize());
