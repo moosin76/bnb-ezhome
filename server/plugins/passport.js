@@ -4,10 +4,18 @@ const LocalStrategy = require('passport-local').Strategy;
 const jwt = require('../plugins/jwt');
 const memberModel = require('../api/_model/memberModel');
 const GoogleStrategy = require('passport-google-oauth2').Strategy;
+const KakaoStrategy = require('passport-kakao').Strategy;
+const NaverStrategy = require('passport-naver').Strategy;
 
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, DEV_ENV, VUE_APP_SERVER_PORT, DB_HOST } = process.env;
-const CALLBACK_URL = DEV_ENV=='DEV' ? `http://localhost:${VUE_APP_SERVER_PORT}` : `https://${DB_HOST}`; 
-console.log('callbakc url ', CALLBACK_URL);
+const {
+	GOOGLE_CLIENT_ID,
+	GOOGLE_CLIENT_SECRET,
+	CALLBACK_URL,
+	KAKAO_CLIENT_ID,
+	KAKAO_CLIENT_SECRET,
+	NAVER_CLIENT_ID,
+	NAVER_CLIENT_SECRET,
+} = process.env;
 
 module.exports = (app) => {
 	app.use(passport.initialize());
@@ -38,11 +46,44 @@ module.exports = (app) => {
 		},
 		async function (request, accessToken, refreshToken, profile, done) {
 			// console.log(profile);
-			if(profile && profile.id) {
+			if (profile && profile.id) {
 				const member = await memberModel.loginGoole(request, profile);
 				return done(null, member);
 			} else {
-				return done('로그인 실패', null )
+				return done('로그인 실패', null)
+			}
+		}
+	));
+
+	passport.use(new KakaoStrategy({
+		clientID: KAKAO_CLIENT_ID,
+		clientSecret: KAKAO_CLIENT_SECRET,
+		callbackURL: `${CALLBACK_URL}/api/member/kakao-callback`,
+		passReqToCallback: true
+	},
+		async (request, accessToken, refreshToken, profile, done) => {
+			if (profile && profile.id) {
+				const member = await memberModel.loginKakao(request, profile);
+				return done(null, member);
+			} else {
+				return done('로그인 실패', null)
+			}
+		}
+	));
+
+	passport.use(new NaverStrategy(
+		{
+			clientID: NAVER_CLIENT_ID,
+			clientSecret: NAVER_CLIENT_SECRET,
+			callbackURL: `${CALLBACK_URL}/api/member/naver-callback`,
+			passReqToCallback: true
+		},
+		async function (request, accessToken, refreshToken, profile, done) {
+			if (profile && profile.id) {
+				const member = await memberModel.loginNaver(request, profile);
+				return done(null, member);
+			} else {
+				return done('로그인 실패', null)
 			}
 		}
 	));
