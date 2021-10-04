@@ -52,7 +52,7 @@ export default {
   data() {
     return {
       loading: false,
-			isCheck: !this.cbCheck,
+			isCheck: this.origin ? true : !this.cbCheck,
 			errMsg : "",
 			successMsg : "", 
     };
@@ -64,7 +64,7 @@ export default {
 	},
   mounted() {
     // console.log('attrs', this.$attrs);
-    // console.log(this.cbCheck);
+    console.log(this.origin);
   },
   methods: {
     onInput(val) {

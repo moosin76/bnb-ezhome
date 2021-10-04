@@ -9,11 +9,19 @@ router.get('/duplicateCheck/:field/:value', async (req, res) => {
 	res.json(result);
 });
 
+// 회원 생성
 router.post('/', async (req, res) => {
 	const result = await modelCall(memberModel.createMember, req);
 	res.json(result);
 });
 
+// 회원정보 수정
+router.patch('/', async (req, res) => {
+	const result = await modelCall(memberModel.updateMember, req);
+	res.json(result);
+});
+
+// 로컬 로그인 
 router.post('/loginLocal', async (req, res) => {
 	passport.authenticate('local', function (err, member, info) {
 		if (info) {
@@ -106,5 +114,10 @@ router.get('/naver-callback',  (req, res)=>{
 		res.end(result);
 	})(req, res);
 });
+
+router.post('/checkPassword', async (req, res)=>{
+	const result = await modelCall(memberModel.checkPassword, req);
+	res.json(result);
+})
 
 module.exports = router;

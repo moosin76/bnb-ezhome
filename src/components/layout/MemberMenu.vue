@@ -1,16 +1,18 @@
 <template>
   <div>
     <v-card-actions>
-      <v-btn color="primary" block>회원정보수정</v-btn>
+      <v-btn color="primary" @click="$emit('open')" block>회원정보수정</v-btn>
     </v-card-actions>
     <v-card-actions>
       <v-btn color="secondary" @click="logout" block>로그아웃</v-btn>
     </v-card-actions>
+		
   </div>
 </template>
 
 <script>
 import { mapActions, mapState } from "vuex";
+
 export default {
   name: "MemberMenu",
   computed: {
@@ -19,7 +21,7 @@ export default {
     }),
   },
 	methods : {
-		...mapActions('user', ['signOut']),
+		...mapActions('user', ['signOut',]),
 		async logout() {
 			const mb_name = await this.signOut();
 			if(mb_name) {
@@ -28,7 +30,7 @@ export default {
 					this.$router.push('/');
 				}
 			}
-		}
+		},
 	}
 };
 </script>

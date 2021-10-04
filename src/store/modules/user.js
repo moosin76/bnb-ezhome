@@ -38,6 +38,11 @@ export const actions = {
 		const data = await $axios.post(`/api/member`, form);
 		return data;
 	},
+	async updateMember({commit}, form) {
+		const { $axios } = Vue.prototype;
+		const data = await $axios.patch(`/api/member`, form);
+		return data;
+	},
 	async signInLocal({ commit }, form) {
 		const { $axios } = Vue.prototype;
 		const data = await $axios.post(`/api/member/loginLocal`, form);
@@ -47,6 +52,12 @@ export const actions = {
 		}
 		return !!data;
 	},
+	async checkPassword({ commit }, form) {
+		const { $axios } = Vue.prototype;
+		const data = await $axios.post(`/api/member/checkPassword`, form);
+		return data;
+	},
+
 	async signOut ({commit, state}) {
 		const mb_name = state.member.mb_name;
 		const {$axios} = Vue.prototype;
