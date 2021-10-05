@@ -27,13 +27,20 @@ export default {
 		}
 	},
 	watch : {
-		member() {
+		member() {	
 			this.hasImage = true;
 		}
 	},
 	computed : {
 		memberPhoto() {
-			return this.member.mb_photo || `/upload/memberPhoto/${this.member.mb_id}.jpg?w=32&h=32`
+			if(this.member.mb_provier) {
+				return this.member.mb_photo;
+			} else {
+				// 경로.jpg?v=1&w=32&h=32
+				// console.log(this.member.mb_photo);
+				return this.member.mb_photo + '?w=32&h=32';
+			}
+			// return this.member.mb_photo || `/upload/memberPhoto/${this.member.mb_id}.jpg?w=32&h=32`
 		}
 	},
 	methods : {

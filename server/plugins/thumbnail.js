@@ -50,6 +50,8 @@ const thumbnail = function (uploadPath) {
 			return res.end(fs.readFileSync(destFile));
 		}
 		// console.log('캐쉬 파일 생성');
+		// console.log('srcFile', srcFile);
+		// console.log('destFile', destFile);
 		await sharp(srcFile).resize(w || null, h || null).toFile(destFile);
 		return res.end(fs.readFileSync(destFile));
 	}

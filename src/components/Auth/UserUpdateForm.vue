@@ -56,6 +56,10 @@
 				:prepend-icon="null"
 				accept="image/jpg,image/png"
 			/>
+			<v-checkbox
+				v-model="form.deleteImage"
+				label="삭제"
+			></v-checkbox>
 		</div>
 
 
@@ -144,6 +148,7 @@ export default {
 		this.form = deepCopy(this.member);
 		this.form.mb_password = "",
 		this.form.admMode = this.admMode;
+		this.form.deleteImage = false;
 		delete this.form.mb_create_at;
 		delete this.form.mb_create_ip;
 		delete this.form.mb_update_at;

@@ -2,12 +2,14 @@ const fs = require('fs');
 const db = require('../../plugins/mysql');
 const jwt = require('../../plugins/jwt');
 const sendMailer = require('../../plugins/sendMailer');
+const path = require('path');
 
 const sqlHelper = require('../../../util/sqlHelper');
 const TABLE = require('../../../util/TABLE');
 const { LV } = require('../../../util/level');
 const moment = require('../../../util/moment');
 const { getIp } = require('../../../util/lib');
+const e = require('express');
 
 
 
@@ -69,12 +71,15 @@ const memberModel = {
 			mb_create_ip: ip,
 			mb_update_at: at,
 			mb_update_ip: ip,
+
 		};
 		// 이미지 업로드 처리
 		delete payload.mb_image;
+		const fileName = jwt.getRandToken(16);
 		if (req.files && req.files.mb_image) {
-			console.log(MEMBER_PHOTO_PATH);
-			req.files.mb_image.mv(`${MEMBER_PHOTO_PATH}/${payload.mb_id}.jpg`, (err) => {
+			paylod.mb_photo = `/upload/memberPhoto/${fileName}.jpg`;
+			// console.log(MEMBER_PHOTO_PATH);
+			req.files.mb_image.mv(`${MEMBER_PHOTO_PATH}/${fileName}.jpg`, (err) => {
 				if (err) {
 					console.log("Member image upload error", err);
 				}
@@ -88,7 +93,75 @@ const memberModel = {
 		return row.affectedRows == 1;
 	},
 	async updateMember(req) {
-		return {body :req.body, file : req.files};
+		const at = moment().format('LT');
+		const ip = getIp(req);
+
+		const payload = {
+			...req.body,
+			mb_update_at: at,
+			mb_update_ip: ip,
+		};
+
+		// 레벨은 관리자 모드 amdMode true
+		const admMode = payload.admMode;
+		const mb_id = payload.mb_id;
+		const deleteImage = payload.deleteImage;
+		delete payload.admMode;
+		delete payload.mb_id;
+		delete payload.deleteImage;
+
+		// 비밀번호 값이 있으면 변경
+		if (payload.mb_password) {
+			payload.mb_password = jwt.generatePassword(payload.mb_password);
+		} else {
+			delete payload.mb_password;
+		}
+
+		// 이미지 업로드 처리
+		delete payload.mb_image;
+		const mb_photo = payload.mb_photo;
+		const photoPathInfo = path.parse(mb_photo);
+		const oldName = photoPathInfo.name;
+		const oldFile = `${MEMBER_PHOTO_PATH}/${oldName}.jpg`;
+		const cachePath = `${MEMBER_PHOTO_PATH}/.cache`;
+
+		if (deleteImage || (req.files && req.files.mb_image)) {
+			// 할일 기존 이미지 삭제
+			payload.mb_photo = '';
+			try {
+				// console.log("file delete", e.message);
+				fs.unlinkSync(oldFile);
+				const cacheDir = fs.readdirSync(cachePath);
+				for (const p of cacheDir) {
+					if (p.startsWith(oldName)) {
+						try {
+							console.log(`delete ${p}`);
+							fs.unlinkSync(`${cachePath}/${p}`);
+						} catch (e) {
+							console.log(`delete ${p} error`, e.message);
+						}
+					}
+				}
+			} catch (e) {
+				//	console.log("file delete error", e.message);
+			}
+		}
+
+		if (req.files && req.files.mb_image) {
+			// console.log(MEMBER_PHOTO_PATH);
+			const newName = jwt.getRandToken(16);
+			payload.mb_photo = `/upload/memberPhoto/${newName}.jpg`;
+			const newFile = `${MEMBER_PHOTO_PATH}/${newName}.jpg`;
+			req.files.mb_image.mv(newFile, (err) => {
+				if (err) {
+					console.log("Member image upload error", err);
+				}
+			});
+		}
+		const sql = sqlHelper.Update(TABLE.MEMBER, payload, { mb_id });
+		const [row] = await db.execute(sql.query, sql.values);
+
+		return await memberModel.getMemberBy({ mb_id });
 	},
 	async getMemberBy(form, cols = []) {
 		// {mb_id : test, mb_password : hash}
@@ -197,7 +270,7 @@ const memberModel = {
 			// 토큰, 만들고 쿠키 생성
 			const token = jwt.getToken(member);
 			req.body.mb_id = member.mb_id;
-		
+
 			const data = memberModel.loginMember(req);
 			member.mb_login_at = data.mb_login_at;
 			member.mb_login_ip = data.mb_login_ip;
@@ -221,10 +294,10 @@ const memberModel = {
 			const at = moment().format('LT');
 			const ip = getIp(req);
 			const data = {
-				mb_id : profile.id,
-				mb_password : '',
-				mb_name : profile.displayName,
-				mb_email : profile.email,
+				mb_id: profile.id,
+				mb_password: '',
+				mb_name: profile.displayName,
+				mb_email: profile.email,
 				mb_level: await getDefaultMemberLevel(),
 				mb_create_at: at,
 				mb_create_ip: ip,
@@ -249,13 +322,13 @@ const memberModel = {
 			const at = moment().format('LT');
 			const ip = getIp(req);
 			const data = {
-				mb_id : profile.id,
-				mb_password : '',
-				mb_provider : profile.provider,
-				mb_name : profile._json.properties.nickname,
-				mb_gender : profile._json.kakao_account.gender == 'male' ? 'M' : 'F',
-				mb_email : profile._json.kakao_account.email,
-				mb_photo : profile._json.properties.thumbnail_image,
+				mb_id: profile.id,
+				mb_password: '',
+				mb_provider: profile.provider,
+				mb_name: profile._json.properties.nickname,
+				mb_gender: profile._json.kakao_account.gender == 'male' ? 'M' : 'F',
+				mb_email: profile._json.kakao_account.email,
+				mb_photo: profile._json.properties.thumbnail_image,
 				mb_level: await getDefaultMemberLevel(),
 				mb_create_at: at,
 				mb_create_ip: ip,
@@ -280,12 +353,12 @@ const memberModel = {
 			const at = moment().format('LT');
 			const ip = getIp(req);
 			const data = {
-				mb_id : profile.id,
-				mb_password : '',
-				mb_provider : profile.provider,
-				mb_name : profile._json.nickname,
-				mb_email : profile._json.email,
-				mb_photo : profile._json.profile_image,
+				mb_id: profile.id,
+				mb_password: '',
+				mb_provider: profile.provider,
+				mb_name: profile._json.nickname,
+				mb_email: profile._json.email,
+				mb_photo: profile._json.profile_image,
 				mb_level: await getDefaultMemberLevel(),
 				mb_create_at: at,
 				mb_create_ip: ip,
@@ -301,16 +374,16 @@ const memberModel = {
 		return member;
 	},
 	async checkPassword(req) {
-		if(!req.user) {
+		if (!req.user) {
 			throw new Error('로그인 되어 있지 않습니다.');
 		}
-		const data  = {
-			mb_id : req.user.mb_id,
-			mb_password : await jwt.generatePassword(req.body.mb_password),
+		const data = {
+			mb_id: req.user.mb_id,
+			mb_password: await jwt.generatePassword(req.body.mb_password),
 		};
 		const sql = sqlHelper.SelectSimple(TABLE.MEMBER, data, ['COUNT(*) AS cnt']);
-		const [[{cnt}]] = await db.execute(sql.query, sql.values);
-		if(cnt == 0) {
+		const [[{ cnt }]] = await db.execute(sql.query, sql.values);
+		if (cnt == 0) {
 			throw new Error('비밀번호가 일치 하지 않습니다.');
 		} else {
 			return true;

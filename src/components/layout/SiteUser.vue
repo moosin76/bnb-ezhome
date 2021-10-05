@@ -101,11 +101,10 @@ export default {
       this.isLoading = true;
 			const data = await this.updateMember(form);
 			this.isLoading = false;
-			// if(data) {
-			// 	const mb_name = form.get('mb_name');
-			// 	this.$toast.info(`${mb_name}님 회원가입 하셧습니다.`);
-			// 	this.$router.push('/login');
-			// }
+			if(data) {
+				this.$toast.info(`${this.$store.state.user.member.mb_name}님 정보 수정하였습니다.`);
+				this.closeDialog();
+			}
     },
     async checkEmail(email) {
       const data = await this.duplicateCheck({
