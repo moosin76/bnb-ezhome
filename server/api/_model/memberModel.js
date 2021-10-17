@@ -119,7 +119,7 @@ const memberModel = {
 
 		// 이미지 업로드 처리
 		delete payload.mb_image;
-		const mb_photo = payload.mb_photo;
+		const mb_photo = payload.mb_photo || '';
 		const photoPathInfo = path.parse(mb_photo);
 		const oldName = photoPathInfo.name;
 		const oldFile = `${MEMBER_PHOTO_PATH}/${oldName}.jpg`;

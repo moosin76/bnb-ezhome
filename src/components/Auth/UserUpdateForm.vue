@@ -15,19 +15,21 @@
       :rules="rules.name()"
     />
 
-    <input-password
-      label="비밀번호"
-      prepend-icon="mdi-lock"
-      v-model="form.mb_password"
-      :rules="rules.password({required : false})"
-    />
+		<template v-if="!member.mb_provider">
+			<input-password
+				label="비밀번호"
+				prepend-icon="mdi-lock"
+				v-model="form.mb_password"
+				:rules="rules.password({required : false})"
+			/>
 
-    <input-password
-      label="비밀번호 확인"
-      prepend-icon="mdi-lock-check"
-      v-model="confimPw"
-      :rules="[rules.matchValue(form.mb_password)]"
-    />
+			<input-password
+				label="비밀번호 확인"
+				prepend-icon="mdi-lock-check"
+				v-model="confimPw"
+				:rules="[rules.matchValue(form.mb_password)]"
+			/>
+		</template>
 
     <input-duplicate-check
       ref="email"
@@ -86,6 +88,10 @@
 
     <v-btn type="submit" block color="primary" :loading="isLoading">
       회원수정
+    </v-btn>
+
+		<v-btn block class="mt-4" color="error" :loading="isLoading" @click="$emit('onLeave')">
+      회원탈퇴
     </v-btn>
   </v-form>
 </template>

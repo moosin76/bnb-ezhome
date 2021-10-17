@@ -34,6 +34,7 @@
             :isLoading="isLoading"
             :cbCheckEmail="checkEmail"
             @onSave="save"
+            @onLeave="leave"
           />
         </v-card-text>
       </v-card>
@@ -69,7 +70,12 @@ export default {
     this.getDarkMode();
   },
   methods: {
-    ...mapActions("user", ["duplicateCheck", "checkPassword", 'updateMember']),
+    ...mapActions("user", [
+      "duplicateCheck",
+      "checkPassword",
+      "updateMember",
+      "signOut",
+    ]),
     setDarkMode(mode) {
       localStorage.setItem("darkMode", mode ? "dark" : "light");
       this.$vuetify.theme.dark = mode;
@@ -79,7 +85,7 @@ export default {
       this.$vuetify.theme.dark = mode;
     },
     async openDialog() {
-			this.dialog = true;
+      this.dialog = true;
       // if (!this.member.mb_provider) {
       //   const mb_password = await this.$ezNotify.prompt(
       //     "비밀번호를 입력하세요",
@@ -99,12 +105,43 @@ export default {
     },
     async save(form) {
       this.isLoading = true;
-			const data = await this.updateMember(form);
-			this.isLoading = false;
-			if(data) {
-				this.$toast.info(`${this.$store.state.user.member.mb_name}님 정보 수정하였습니다.`);
-				this.closeDialog();
-			}
+      const data = await this.updateMember(form);
+      this.isLoading = false;
+      if (data) {
+        this.$toast.info(
+          `${this.$store.state.user.member.mb_name}님 정보 수정하였습니다.`
+        );
+        this.closeDialog();
+      }
+    },
+    async leave() {
+      const result = await this.$ezNotify.confirm(
+        "정말로 탈퇴하시겠습니까?",
+        "회원탈퇴",
+        {
+          icon: "mdi-alert",
+        }
+      );
+
+      if (!result) return;
+
+      this.isLoading = true;
+
+      const form = {
+        mb_id: this.member.mb_id,
+        mb_leave_at: this.$moment().format("LT"),
+      };
+      const data = await this.updateMember(form);
+      this.isLoading = false;
+      if (data) {
+        // this.$toast.info(`${this.$store.state.user.member.mb_name}님 탈퇴하였습니다.`);
+        this.closeDialog();
+        const mb_name = await this.signOut();
+        this.$toast.info(`${mb_name}님 탈퇴 하였습니다.`);
+       	if(this.$route.name != 'Home') {
+					this.$router.push('/');
+				}
+      }
     },
     async checkEmail(email) {
       const data = await this.duplicateCheck({
