@@ -1,9 +1,10 @@
 import Vue from "vue";
 import qs from 'qs';
+import { LV } from '../../../util/level';
 
 export const state = () => ({
 	member: null,
-	token : null,
+	token: null,
 });
 
 export const mutations = {
@@ -16,14 +17,19 @@ export const mutations = {
 };
 
 export const getters = {
-
+	isAdmin(state) {
+		return state.member && state.member.mb_level >= LV.ADMIN;
+	},
+	isSuper(state) {
+		return state.member && state.member.mb_level >= LV.SUPER;
+	}
 };
 
 export const actions = {
 	async initUser({ commit }) {
 		const { $axios } = Vue.prototype;
 		const data = await $axios.get('/api/member/auth');
-		if (data && data.member && data.token ) {
+		if (data && data.member && data.token) {
 			commit('SET_MEMBER', data.member);
 			commit('SET_TOKEN', data.token);
 		}
@@ -38,11 +44,11 @@ export const actions = {
 		const data = await $axios.post(`/api/member`, form);
 		return data;
 	},
-	async updateMember({commit}, form) {
+	async updateMember({ commit }, form) {
 		const { $axios } = Vue.prototype;
 		commit('SET_MEMBER', null);
 		const data = await $axios.patch(`/api/member`, form);
-		if(data) {
+		if (data) {
 			commit('SET_MEMBER', data);
 		}
 		return !!data;
@@ -62,9 +68,9 @@ export const actions = {
 		return data;
 	},
 
-	async signOut ({commit, state}) {
+	async signOut({ commit, state }) {
 		const mb_name = state.member.mb_name;
-		const {$axios} = Vue.prototype;
+		const { $axios } = Vue.prototype;
 		await $axios.get('/api/member/signOut');
 		// console.log('mb_name', mb_name);
 		commit('SET_MEMBER', null);
@@ -73,19 +79,19 @@ export const actions = {
 		return mb_name;
 	},
 	async findIdLocal(ctx, form) {
-		const {$axios} = Vue.prototype;
+		const { $axios } = Vue.prototype;
 		const query = qs.stringify(form);
 		const data = await $axios.get(`/api/member/findId?${query}`);
 		return data;
 	},
 	async findPwLocal(ctx, form) {
-		const {$axios} = Vue.prototype;
+		const { $axios } = Vue.prototype;
 		const query = qs.stringify(form);
 		const data = await $axios.get(`/api/member/findPw?${query}`);
 		return data;
 	},
 	async modifyPassword(ctx, form) {
-		const {$axios} = Vue.prototype;
+		const { $axios } = Vue.prototype;
 		const data = await $axios.patch(`/api/member/modifyPassword`, form);
 		return data;
 	}

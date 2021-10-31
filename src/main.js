@@ -8,8 +8,9 @@ import vuetify from './plugins/vuetify'
 import '@babel/polyfill'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import '@mdi/font/css/materialdesignicons.css'
-import './plugins/axios'
-import './plugins/moment';
+import './plugins'
+// import './plugins/axios'
+// import './plugins/moment';
 
 import titleMixin from './mixins/title-mixin';
 

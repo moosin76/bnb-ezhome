@@ -1,24 +1,50 @@
 <template>
   <div>
+		<!-- 관리자 메뉴 -->
+		<v-list v-if="isAdmin" dense>
+			<v-subheader>관리자 메뉴</v-subheader>
+			<v-list-item
+				v-for="item in admMenus"
+				:key="item.title"
+				dense
+				:to="item.to"
+			>
+				<v-list-item-icon>
+					<v-icon>{{item.icon}}</v-icon>
+				</v-list-item-icon>
+				<v-list-item-content>
+					<v-list-item-title>{{item.title}}</v-list-item-title>
+				</v-list-item-content>
+			</v-list-item>
+		</v-list>
+		<!-- // 관리자 메뉴 -->
     <v-card-actions>
       <v-btn color="primary" @click="$emit('open')" block>회원정보수정</v-btn>
     </v-card-actions>
     <v-card-actions>
       <v-btn color="secondary" @click="logout" block>로그아웃</v-btn>
     </v-card-actions>
-		
   </div>
 </template>
 
 <script>
-import { mapActions, mapState } from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
 
 export default {
   name: "MemberMenu",
+	data() {
+		return {
+			admMenus :[
+				{title : '설정 관리', icon : 'mdi-cog', to: '/adm/config'},
+				{title : '회원 관리', icon : 'mdi-account-cog', to: '/adm/member'},
+			]
+		};
+	},
   computed: {
     ...mapState({
       member: (state) => state.user.member,
     }),
+		...mapGetters('user', ['isAdmin', 'isSuper']),
   },
 	methods : {
 		...mapActions('user', ['signOut',]),

@@ -1,7 +1,8 @@
 import { createApp } from "./main";
-import "./plugins-client/vue-toast";
-import "./plugins-client/vue-progressbar";
-import "./plugins-client/ezNotify";
+// import "./plugins-client/vue-toast";
+// import "./plugins-client/vue-progressbar";
+// import "./plugins-client/ezNotify";
+import './plugins-client';
 
 const { app, router, store } = createApp();
 

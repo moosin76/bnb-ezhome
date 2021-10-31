@@ -9,9 +9,6 @@ const TABLE = require('../../../util/TABLE');
 const { LV } = require('../../../util/level');
 const moment = require('../../../util/moment');
 const { getIp } = require('../../../util/lib');
-const e = require('express');
-
-
 
 function clearMemberField(member) {
 	delete member.mb_password;
