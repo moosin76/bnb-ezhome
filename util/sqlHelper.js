@@ -1,5 +1,5 @@
 const sqlHelper = {
-	SelectSimple(table, data = null, cols = []) {
+	SelectSimple(table, data = null, cols = [], sort=null) {
 		let query = `SELECT * FROM ${table}`;
 		const where = [];
 		const values = [];
@@ -10,11 +10,26 @@ const sqlHelper = {
 				where.push(`${key}=?`)
 				values.push(data[key]);
 			}
-			query += ` WHERE ` + where.join(' AND ');
+			if(where.length > 0) {
+				query += ` WHERE ` + where.join(' AND ');
+			}
 		}
 
+		// 선택 필드
 		if (cols.length > 0) {
 			query = query.replace('*', cols.join(','));
+		}
+
+		// 정렬
+		if(sort) {
+			let sorts = [];
+			const keys = Object.keys(sort);
+			for(const key of keys) {
+				sorts.push (key + (sort[key] ? ' ASC ' : ' DESC '));
+			}
+			if(sorts.length) {
+				query += ` ORDER BY ` + sorts.join(', ');
+			}
 		}
 
 		return { query, values };

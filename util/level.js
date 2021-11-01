@@ -37,6 +37,9 @@ const level = {
 			return 'red accent-4';
 		}
 	},
+	isGrant(req, lv) {
+		return req.user && req.user.mb_level >= lv ? true : false;
+	}
 };
 
 module.exports = level;

@@ -62,12 +62,14 @@ const store = new Vuex.Store({
 					subItems : []
 				}
 			],
+			
 		}
 	},
 	mutations: {
 		SET_APP_READY(state) {
 			state.appReady = true;
-		}
+		},
+		
 	},
 	actions: {
 		async appInit({dispatch, commit}, ctx) {
@@ -89,7 +91,8 @@ const store = new Vuex.Store({
 			const {$axios} = Vue.prototype;
 			const data = await $axios.post('/api/config', form);
 			return data;
-		}
+		},
+		
 	},
 	modules
 });

@@ -62,9 +62,14 @@ export default {
 			return !!this.cbCheck && this.$refs.field.errorBucket.length === 0;
 		}
 	},
+	watch: {
+		origin() {
+			this.isCheck = this.origin ? true : !this.cbCheck;
+		}
+	},
   mounted() {
     // console.log('attrs', this.$attrs);
-    console.log(this.origin);
+    // console.log(this.origin);
   },
   methods: {
     onInput(val) {
