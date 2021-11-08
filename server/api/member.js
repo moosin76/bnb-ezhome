@@ -77,38 +77,16 @@ router.patch('/modifyPassword', async(req, res)=>{
 
 // 구글 로그인 요청
 router.get('/loginGoogle', passport.authenticate("google", { scope: ["email", "profile"] }));
-
-// 구글 로그인 콜백
-router.get('/google-callback',  (req, res)=>{
-	passport.authenticate('google', async function (err, member) {
-		// console.log("member",member);
-		// console.log("err", err);
-		const result = await modelCall(memberModel.socialCallback, req, res,  err, member);
-		res.end(result);
-	})(req, res);
-})
-
 // 카카오 로그인 요청
 router.get('/loginKakao', passport.authenticate("kakao"));
-
-// 카카오 로그인 콜백
-router.get('/kakao-callback',  (req, res)=>{
-	passport.authenticate('kakao', async function (err, member) {
-		// console.log("member",member);
-		// console.log("err", err);
-		const result = await modelCall(memberModel.socialCallback, req, res,  err, member);
-		res.end(result);
-	})(req, res);
-})
-
 // 네이버 로그인 요청
 router.get('/loginNaver', passport.authenticate("naver"));
 
-// 네이버 로그인 콜백
-router.get('/naver-callback',  (req, res)=>{
-	passport.authenticate('naver', async function (err, member) {
+// 소셜 로그인 콜백
+router.get('/social-callback/:provider',  (req, res)=>{
+	const provider = req.params.provider;
+	passport.authenticate(provider, async function (err, member) {
 		// console.log("member",member);
-		// res.json(member);
 		// console.log("err", err);
 		const result = await modelCall(memberModel.socialCallback, req, res,  err, member);
 		res.end(result);
@@ -118,6 +96,6 @@ router.get('/naver-callback',  (req, res)=>{
 router.post('/checkPassword', async (req, res)=>{
 	const result = await modelCall(memberModel.checkPassword, req);
 	res.json(result);
-})
+});
 
 module.exports = router;

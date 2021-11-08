@@ -22,6 +22,11 @@ router.post('/', async(req, res)=>{
 router.put('/', async(req, res)=>{
 	const result = await modelCall(configModel.put, req);
 	res.json(result);
+});
+
+router.delete('/:cf_key', async(req,res)=>{
+	const result = await modelCall(configModel.remove, req);
+	res.json(result);
 })
 
 

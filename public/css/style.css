@@ -4,4 +4,37 @@
 }
 .list-group-item {
 	padding: 0;
+	display: flex;
+	border : 1px solid #ccc;
+	border-radius: 5px;
+	margin-top:8px
+}
+
+.list-group-item .handle + div {
+	padding: 4px; 
+	display: table;
+	width: 100%;
+}
+.list-group-item .handle + div > div {
+	display:table-row;
+	width: 100%;
+}
+.list-group-item .handle + div > div + div > div {
+	border-top: 1px dashed #ccc;
+}
+.list-group-item .handle + div > div > div {
+	display: table-cell;
+	padding: 4px;
+}
+.list-group-item .handle + div > div > div:nth-child(1) {width : 20%;}
+.list-group-item .handle + div > div > div:nth-child(2) {width : auto;}
+.list-group-item .handle + div > div > div:nth-child(3) {width : 32px;}
+.list-group-item .handle + div > div > div:nth-child(4) {width: 36px;}
+.list-group .client {
+	position: relative;
+	top: 5px;
+	left: 5px;
+}
+.list-group .comment {
+	font-size: 0.9em;
 }

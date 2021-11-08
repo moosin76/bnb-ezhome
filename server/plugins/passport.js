@@ -11,12 +11,13 @@ const { LV } = require('../../util/level');
 const {
 	GOOGLE_CLIENT_ID,
 	GOOGLE_CLIENT_SECRET,
-	CALLBACK_URL,
 	KAKAO_CLIENT_ID,
 	KAKAO_CLIENT_SECRET,
 	NAVER_CLIENT_ID,
 	NAVER_CLIENT_SECRET,
-} = process.env;
+} = siteConfig;
+
+const {CALLBACK_URL} = process.env;
 
 function loginRules(member) {
 	// console.log('loginRules', member);
@@ -59,7 +60,7 @@ module.exports = (app) => {
 		{
 			clientID: GOOGLE_CLIENT_ID,
 			clientSecret: GOOGLE_CLIENT_SECRET,
-			callbackURL: `${CALLBACK_URL}/api/member/google-callback`,
+			callbackURL: `${CALLBACK_URL}/api/member/social-callback/google`,
 			passReqToCallback: true
 		},
 		async function (request, accessToken, refreshToken, profile, done) {
@@ -80,7 +81,7 @@ module.exports = (app) => {
 	passport.use(new KakaoStrategy({
 		clientID: KAKAO_CLIENT_ID,
 		clientSecret: KAKAO_CLIENT_SECRET,
-		callbackURL: `${CALLBACK_URL}/api/member/kakao-callback`,
+		callbackURL: `${CALLBACK_URL}/api/member/social-callback/kakao`,
 		passReqToCallback: true
 	},
 		async (request, accessToken, refreshToken, profile, done) => {
@@ -101,7 +102,7 @@ module.exports = (app) => {
 		{
 			clientID: NAVER_CLIENT_ID,
 			clientSecret: NAVER_CLIENT_SECRET,
-			callbackURL: `${CALLBACK_URL}/api/member/naver-callback`,
+			callbackURL: `${CALLBACK_URL}/api/member/social-callback/naver`,
 			passReqToCallback: true
 		},
 		async function (request, accessToken, refreshToken, profile, done) {
