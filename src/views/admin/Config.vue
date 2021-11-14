@@ -43,10 +43,10 @@
       max-width="500"
       dark
       color="primary"
-			persistent
+      persistent
     >
       <config-form
-				ref="configForm"
+        ref="configForm"
         @save="save"
         :keyCheck="keyCheck"
         :groupItems="groupItems"
@@ -100,16 +100,16 @@ export default {
     ...mapActions(["configDuplicateCheck", "configSave"]),
     addConfig() {
       this.item = null;
-			if(	this.$refs.configForm) {
-				this.$refs.configForm.init();
-			}
+      if (this.$refs.configForm) {
+        this.$refs.configForm.init();
+      }
       this.$refs.dialog.open();
     },
     updateConfig(item) {
       this.item = item;
-			if(	this.$refs.configForm) {
-				this.$refs.configForm.init();
-			}
+      if (this.$refs.configForm) {
+        this.$refs.configForm.init();
+      }
       this.$refs.dialog.open();
     },
     async removeConfig(item) {
@@ -124,7 +124,7 @@ export default {
       const data = await this.$axios.delete(`/api/config/${item.cf_key}`);
       // 목록 업데이트
       if (data) {
-				this.$toast.info(`[${item.cf_name}] 삭제 하였습니다.`);
+        this.$toast.info(`[${item.cf_name}] 삭제 하였습니다.`);
         const idx = this.items.indexOf(item);
         this.items.splice(idx, 1);
         this.setCurItems();
@@ -137,7 +137,7 @@ export default {
         const idx = this.items.indexOf(this.item);
         this.items.splice(idx, 1, data);
       } else {
-				this.$toast.info(`[${form.cf_name}] 추가 하였습니다.`);
+        this.$toast.info(`[${form.cf_name}] 추가 하였습니다.`);
         this.items.push(data);
       }
       this.setCurItems();
@@ -153,10 +153,15 @@ export default {
     sortEnd() {
       // 현제 curItems 있는 정보로 cf_sort 업데이트 전체
       let i = 0;
+      const payload = [];
       this.curItems.forEach((item) => {
         item.cf_sort = i++;
+        payload.push({
+          cf_key: item.cf_key,
+          cf_sort: item.cf_sort,
+        });
       });
-      this.$axios.put("/api/config", this.curItems);
+      this.$axios.put("/api/config", payload);
     },
     setCurItems() {
       this.curItems = this.items.filter((item) => {

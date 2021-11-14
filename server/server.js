@@ -93,6 +93,7 @@ const fs = require('fs');
 			metas : `<!-- inject more metas -->`,
 			member : req.user || null,
 			token : req.cookies.token || null,
+			config : clientConfig,
 		};
 		const stream = renderer.renderToStream(ctx);
 		stream.on('end', ()=>{

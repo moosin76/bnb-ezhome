@@ -14,8 +14,8 @@
             <v-checkbox
               v-model="form.cf_client"
               color="primary"
-              true-value="1"
-              false-value="0"
+              :true-value="1"
+              :false-value="0"
             ></v-checkbox>
           </span>
         </template>
