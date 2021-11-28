@@ -11,6 +11,9 @@ require('./plugins/pm2Bus');
 	const port = process.env.VUE_APP_SERVER_PORT || 3000;
 	const webServer = http.createServer(app);
 
+	const socket = require('./plugins/socket');
+	socket(webServer);
+
 	// cors
 	// const cors = require('cors');
 	// app.use(cors())
@@ -27,6 +30,7 @@ require('./plugins/pm2Bus');
 	// 	console.log('test site->', siteConfig.test1);
 	// 	console.log('test clie->', clientConfig.test1);
 	// }, 5000);
+
 
 	let isDisableKeepAlive = false;
 	app.use((req, res, next)=>{
