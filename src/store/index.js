@@ -15,6 +15,10 @@ const store = new Vuex.Store({
 		},
 		SET_CONFIG(state, { key, value }) {
 			// console.log(typeof value, key, value);
+			try {
+				value = JSON.parse(value);
+			} catch(e){}
+			
 			if(state.config[key]){
 				state.config[key] = value;
 			} else {

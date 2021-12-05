@@ -13,6 +13,7 @@ import './plugins'
 // import './plugins/moment';
 
 import titleMixin from './mixins/title-mixin';
+import socketMixin from './mixins/socket-mixin';
 
 Vue.config.productionTip = false
 
@@ -22,6 +23,7 @@ export function createApp(ctx) {
 	sync(store, router);
 
 	Vue.mixin(titleMixin);
+	Vue.mixin(socketMixin);
 
 	const app = new Vue({
 		data: { url: ctx ? ctx.url : '' },
