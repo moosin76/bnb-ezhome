@@ -12,6 +12,11 @@ router.get('/', async(req, res)=> {
 	res.json(result);
 });
 
+router.get('/restart', async(req, res)=>{
+	const result = await modelCall(configModel.restart, req);
+	res.json(result);
+})
+
 // 단일
 router.post('/', async(req, res)=>{
 	const result = await modelCall(configModel.post, req.body);

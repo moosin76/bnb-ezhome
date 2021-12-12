@@ -116,7 +116,16 @@ const configModel = {
 		configModel.clearConfigItem(cf_key);// 설정값 삭제
 		return row.affectedRows == 1;
 	},
-
+	async restart(req) {
+		if(!isGrant(req, LV.SUPER))	{
+			throw new Error('최고관리자만 서버 재시작 요청을 할 수 있습니다.');
+		}
+		process.send({
+			type : "config:restart",
+			data : 'restart'
+		});
+		return true;
+	}
 };
 
 module.exports = configModel;

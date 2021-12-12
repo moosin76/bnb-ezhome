@@ -3,8 +3,25 @@
     <v-toolbar>
       <v-toolbar-title>설정관리</v-toolbar-title>
       <v-spacer></v-spacer>
-      <tooltip-btn fab small label="설정 추가" @click="addConfig">
+      <tooltip-btn
+        fab
+        small
+        label="설정 추가"
+        color="primary"
+        @click="addConfig"
+      >
         <v-icon>mdi-plus</v-icon>
+      </tooltip-btn>
+      <tooltip-btn
+        fab
+        small
+        label="서버 재시작"
+        color="error"
+        @click="restartServer"
+        childClass="ml-2"
+        :loading="restart"
+      >
+        <v-icon>mdi-power</v-icon>
       </tooltip-btn>
     </v-toolbar>
 
@@ -58,7 +75,7 @@
 </template>
 
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapState } from "vuex";
 import EzDialog from "../../components/etc/EzDialog.vue";
 import TooltipBtn from "../../components/etc/TooltipBtn.vue";
 import ConfigForm from "./ConfigComponents/ConfigForm.vue";
@@ -74,9 +91,13 @@ export default {
       group: -1,
       curItems: [],
       item: null,
+      restart: false,
     };
   },
   computed: {
+    ...mapState({
+      online: (state) => state.socket.online,
+    }),
     groupItems() {
       const sets = new Set();
       this.items.forEach((item) => {
@@ -89,6 +110,12 @@ export default {
     },
   },
   watch: {
+    online() {
+      if (this.online) {
+        this.$toast.info("서버가 재시작 되었습니다.");
+        this.restart = false;
+      }
+    },
     group() {
       this.setCurItems();
     },
@@ -124,9 +151,9 @@ export default {
       const data = await this.$axios.delete(`/api/config/${item.cf_key}`);
       // 목록 업데이트
       if (data) {
-				if(item.cf_client) {
-					this.$socket.emit('config:remove', item.cf_key);
-				}
+        if (item.cf_client) {
+          this.$socket.emit("config:remove", item.cf_key);
+        }
         this.$toast.info(`[${item.cf_name}] 삭제 하였습니다.`);
         const idx = this.items.indexOf(item);
         this.items.splice(idx, 1);
@@ -135,14 +162,14 @@ export default {
     },
     async save(form) {
       const data = await this.configSave(form);
-			if(data.cf_client) {
-				this.$socket.emit('config:update', {
-					key : data.cf_key, 
-					value: data.cf_val
-				});
-			} else if(this.item && this.item.cf_client){
-				this.$socket.emit('config:remove', data.cf_key);
-			}
+      if (data.cf_client) {
+        this.$socket.emit("config:update", {
+          key: data.cf_key,
+          value: data.cf_val,
+        });
+      } else if (this.item && this.item.cf_client) {
+        this.$socket.emit("config:remove", data.cf_key);
+      }
 
       if (this.item) {
         this.$toast.info(`[${form.cf_name}] 수정 하였습니다.`);
@@ -152,7 +179,7 @@ export default {
         this.$toast.info(`[${form.cf_name}] 추가 하였습니다.`);
         this.items.push(data);
       }
-			
+
       this.setCurItems();
       this.$refs.dialog.close();
     },
@@ -180,6 +207,29 @@ export default {
       this.curItems = this.items.filter((item) => {
         return item.cf_group == this.groupName;
       });
+    },
+    async restartServer() {
+      const result = await this.$ezNotify.confirm(
+        "서버 재시작 요청을 하시겠습니까?",
+        "서버 재시작",
+        { icon: "mdi-power", iconColor: "red" }
+      );
+
+      if (!result) return;
+      this.restart = true;
+      const data = await this.$axios.get("/api/config/restart");
+      if (data) {
+        setTimeout(() => {
+          if (this.restart) {
+            this.$toast.error(
+              "서버 재시작이 실패했습니다.\n잠시 후 다시 시도 하세요."
+            );
+            this.restart = false;
+          }
+        }, 20000);
+      } else {
+				this.restart = false;
+			}
     },
   },
 };
