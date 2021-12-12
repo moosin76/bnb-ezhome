@@ -60,8 +60,7 @@ export default {
   },
 
   methods: {
-    ...mapActions("user", ["signInLocal", "findIdLocal", "findPwLocal"]),
-		...mapMutations('user', ['SET_MEMBER', 'SET_TOKEN']),
+    ...mapActions("user", ["signInLocal", "findIdLocal", "findPwLocal", 'signInSocial']),
     async loginLocal(form) {
       this.isLoading = true;
       const data = await this.signInLocal(form);
@@ -122,8 +121,9 @@ export default {
 			if(payload.err) {
 				this.$toast.error(payload.err);
 			} else {
-				this.SET_MEMBER(payload.member);
-				this.SET_TOKEN(payload.token);
+				this.signInSocial(payload);
+				// this.SET_MEMBER(payload.member);
+				// this.SET_TOKEN(payload.token);
 				// 최초 로그인 정보 변경하는 페이지로 이동해야 하고
 				
 				this.$router.push("/");

@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { mapMutations } from "vuex";
+import { mapActions, mapMutations } from "vuex";
 import SiteFooter from "./components/layout/SiteFooter.vue";
 import SiteNavi from "./components/layout/SiteNavi.vue";
 import SiteTitle from "./components/layout/SiteTitle.vue";
@@ -46,6 +46,7 @@ export default {
 			"connect" :() =>{
 				console.log("socket connect");
 				this.SET_ONLINE(true);
+				this.initRooms();
 			},
 			"disconnect": ()=> {
 				console.log("socket disconnect")
@@ -62,6 +63,7 @@ export default {
   methods: {
     ...mapMutations(["SET_CONFIG"]),
 		...mapMutations('socket', ['SET_ONLINE']),
+		...mapActions('socket', ['initRooms']),
     toggleDrawer() {
       this.drawer = !this.drawer;
     },

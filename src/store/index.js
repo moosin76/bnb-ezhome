@@ -36,6 +36,9 @@ const store = new Vuex.Store({
 				}
 				commit('user/SET_MEMBER', ctx.member);
 				commit('user/SET_TOKEN', ctx.token);
+				if(ctx.member) {
+					commit('socket/ROOM_JOIN', ctx.member.mb_id);
+				}
 			} else {
 				await dispatch('configLoad');
 				await dispatch('user/initUser');

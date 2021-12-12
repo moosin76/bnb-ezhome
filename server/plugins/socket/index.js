@@ -2,6 +2,7 @@ require('dotenv').config();
 const { Server } = require("socket.io");
 const redisAdapter = require('socket.io-redis');
 const configHandler = require('./configHandler');
+const roomHandler = require('./roomHandler');
 
 const { REDIS_HOST, REDIS_PORT } = process.env;
 
@@ -11,6 +12,7 @@ module.exports = function (webServer) {
 
 	io.on("connection", (socket) => {
 		configHandler(io, socket);
+		roomHandler(io, socket);
 
 		console.log('a user connected ' + socket.id);
 
@@ -18,24 +20,28 @@ module.exports = function (webServer) {
 			console.log('disconnect');
 		});
 
-		socket.on('room:join', (roomName) => {
-			console.log("room:join", roomName);
-			socket.join(roomName);
-		});
-
-		socket.on('room:leave', (roomName) => {
-			console.log("room:leave", roomName);
-			socket.leave(roomName);
-		});
-
 		socket.on('room:send', (data) => {
-			console.log(data);
-			const msg = data.msg + " 서버 응답";
-			// io.emit('room:msg', {msg}); // 모든 사용자
-			// socket.broadcast.emit('room:msg', {msg}); // 나를 제외한 모든 사용자
-			io.to('roomtest').emit('room:msg', { msg }); // 룸에 있는 모든 사용자
-			// socket.to('roomtest').emit('room:msg', {msg});	// 룸에있는 나를 제외한 모든 사용자
-		})
+			const msg = data.msg;
+			switch (data.target) {
+				case 1://전체
+					io.emit('room:msg', { msg });
+					break;
+				case 2: // 브로드캐스트
+					socket.broadcast.emit('room:msg', { msg });
+					break;
+				case 3: // 룸 전체
+					io.to('testroom').emit('room:msg', { msg });
+					break;
+				case 4: // 룸 브로드캐스트
+					socket.to('testroom').emit('room:msg', { msg });
+					break;
+			}
+		});
+
+		socket.on('room:chat', (data)=>{
+			const {toId, fromId, userMsg} = data;
+			io.to(toId).emit('room:chat', { fromId, userMsg });
+		});
 	})
 
 }
