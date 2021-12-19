@@ -204,9 +204,9 @@ export default {
       this.$axios.put("/api/config", payload);
     },
     setCurItems() {
-      this.curItems = this.items.filter((item) => {
-        return item.cf_group == this.groupName;
-      });
+      this.curItems = this.items
+        .filter((item) => item.cf_group == this.groupName)
+        .sort((a, b) => a.cf_sort - b.cf_sort);
     },
     async restartServer() {
       const result = await this.$ezNotify.confirm(
@@ -228,8 +228,8 @@ export default {
           }
         }, 20000);
       } else {
-				this.restart = false;
-			}
+        this.restart = false;
+      }
     },
   },
 };

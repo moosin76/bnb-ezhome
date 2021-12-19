@@ -5,7 +5,7 @@
       :value="value"
       @input="onInput"
       :readonly="readonly"
-			:hide-details="readonly"
+      :hide-details="readonly"
     />
   </div>
   <div v-else-if="fieldType == 'Number'">
@@ -15,12 +15,23 @@
       :value="value"
       @input="onInput"
       :readonly="readonly"
-			:hide-details="readonly"
+      :hide-details="readonly"
+    />
+  </div>
+  <div v-else-if="fieldType == 'CheckBox'">
+    <v-checkbox
+      label="Check value"
+      :input-value="value"
+      @change="onInput"
+      :readonly="readonly"
+      :hide-details="readonly"
+			true-value="1"
+			false-value="0"
     />
   </div>
   <div v-else-if="fieldType == 'Json'">
     <template v-if="readonly">
-			<v-btn @click="jsonView" color="primary">JSON 보기</v-btn>
+      <v-btn @click="jsonView" color="primary">JSON 보기</v-btn>
       <ez-dialog ref="dialog" label="JSON 값 보기" width="600">
         <pre class="mt-4">{{ stringify() }}</pre>
       </ez-dialog>
@@ -40,7 +51,7 @@
       :value="value"
       @input="onInput"
       :readonly="readonly"
-			:hide-details="readonly"
+      :hide-details="readonly"
     />
   </div>
   <div v-else>
@@ -83,9 +94,9 @@ export default {
       // console.log(str);
       return str;
     },
-		jsonView() {
-			this.$refs.dialog.open();
-		}
+    jsonView() {
+      this.$refs.dialog.open();
+    },
   },
 };
 </script>

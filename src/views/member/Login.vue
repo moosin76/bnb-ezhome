@@ -24,25 +24,24 @@
           </v-tab-item>
         </v-tabs-items>
       </v-card-text>
-      <v-card-text class="mt-n4">
+      <v-card-text class="mt-n4" v-if="config.useLoginGoogle">
         <v-btn @click="loginGoogle" block>구글 로그인</v-btn>
       </v-card-text>
-			<v-card-text class="mt-n4">
+      <v-card-text class="mt-n4" v-if="config.useLoginKakao">
         <v-btn @click="loginKakao" block>카카오 로그인</v-btn>
       </v-card-text>
-			<v-card-text class="mt-n4">
+      <v-card-text class="mt-n4" v-if="config.useLoginNaver">
         <v-btn @click="loginNaver" block>네이버 로그인</v-btn>
       </v-card-text>
       <v-card-text class="mt-n4">
         <v-btn to="/join" block>회원가입</v-btn>
       </v-card-text>
     </v-card>
-
   </div>
 </template>
 
 <script>
-import { mapActions, mapMutations } from "vuex";
+import { mapActions, mapState } from "vuex";
 import FindIdForm from "../../components/Auth/FindIdForm.vue";
 import FindPwForm from "../../components/Auth/FindPwForm.vue";
 import SignInForm from "../../components/Auth/SignInForm.vue";
@@ -55,12 +54,21 @@ export default {
       tabs: parseInt(this.$route.query.tab) || 0,
       items: ["로그인", "아이디 찾기", "비밀번호 찾기"],
       isLoading: false,
-			dialog: false,
+      dialog: false,
     };
   },
-
+  computed: {
+    ...mapState({
+      config: (state) => state.config,
+    }),
+  },
   methods: {
-    ...mapActions("user", ["signInLocal", "findIdLocal", "findPwLocal", 'signInSocial']),
+    ...mapActions("user", [
+      "signInLocal",
+      "findIdLocal",
+      "findPwLocal",
+      "signInSocial",
+    ]),
     async loginLocal(form) {
       this.isLoading = true;
       const data = await this.signInLocal(form);
@@ -96,46 +104,45 @@ export default {
         this.tabs = 0;
       }
     },
-		socialPopup(url) {
-			const childWindow = window.open(
+    socialPopup(url) {
+      const childWindow = window.open(
         url,
         "auth",
         "top=10, left=10, width=500, height=600, status=no, menubar=no, toolbar=no, resizable=no"
       );
 
-			if(!window.onSocialCallback) {
-				window.onSocialCallback = this.socialCallback;
-			}
-		},
-   	loginGoogle() {
-			this.socialPopup("/api/member/loginGoogle");
+      if (!window.onSocialCallback) {
+        window.onSocialCallback = this.socialCallback;
+      }
     },
-		loginKakao() {
-			this.socialPopup("/api/member/loginKakao");
-		},
-		loginNaver() {
-			this.socialPopup("/api/member/loginNaver");
-		},
-		socialCallback(payload) {
-			// console.log(payload);
-			if(payload.err) {
-				this.$toast.error(payload.err);
-			} else {
-				this.signInSocial(payload);
-				// this.SET_MEMBER(payload.member);
-				// this.SET_TOKEN(payload.token);
-				// 최초 로그인 정보 변경하는 페이지로 이동해야 하고
-				
-				this.$router.push("/");
+    loginGoogle() {
+      this.socialPopup("/api/member/loginGoogle");
+    },
+    loginKakao() {
+      this.socialPopup("/api/member/loginKakao");
+    },
+    loginNaver() {
+      this.socialPopup("/api/member/loginNaver");
+    },
+    socialCallback(payload) {
+      // console.log(payload);
+      if (payload.err) {
+        this.$toast.error(payload.err);
+      } else {
+        this.signInSocial(payload);
+        // this.SET_MEMBER(payload.member);
+        // this.SET_TOKEN(payload.token);
+        // 최초 로그인 정보 변경하는 페이지로 이동해야 하고
+
+        this.$router.push("/");
         this.$toast.info(
           `${this.$store.state.user.member.mb_name}님 환영합니다.`
         );
-			}
-			// window.removeEventListener('message', this.googleLoginCallback);
-		}
+      }
+      // window.removeEventListener('message', this.googleLoginCallback);
+    },
   },
 };
-
 </script>
 
 <style>

@@ -85,7 +85,7 @@ export default {
     return {
       valid: true,
       form: null,
-      typeItems: ["String", "Number", "Json", "Secret"],
+      typeItems: ["String", "Number", "CheckBox", "Json", "Secret"],
 			originKey: null,
     };
   },
