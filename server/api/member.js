@@ -52,25 +52,25 @@ router.get('/auth', (req, res) => {
 })
 
 // 로그아웃
-router.get('/signOut', (req, res)=>{
+router.get('/signOut', (req, res) => {
 	res.clearCookie('token');
 	res.json(true);
 });
 
 // 아이디 찾기
-router.get('/findId', async(req, res)=>{
+router.get('/findId', async (req, res) => {
 	const result = await modelCall(memberModel.findId, req.query);
 	res.json(result);
 });
 
 // 비밀번호 찾기
-router.get('/findPw', async(req, res)=>{
+router.get('/findPw', async (req, res) => {
 	const result = await modelCall(memberModel.findPw, req);
 	res.json(result);
 });
 
 // 비밀번호 수정
-router.patch('/modifyPassword', async(req, res)=>{
+router.patch('/modifyPassword', async (req, res) => {
 	const result = await modelCall(memberModel.modifyPassword, req.body);
 	res.json(result);
 });
@@ -83,19 +83,24 @@ router.get('/loginKakao', passport.authenticate("kakao"));
 router.get('/loginNaver', passport.authenticate("naver"));
 
 // 소셜 로그인 콜백
-router.get('/social-callback/:provider',  (req, res)=>{
+router.get('/social-callback/:provider', (req, res) => {
 	const provider = req.params.provider;
 	passport.authenticate(provider, async function (err, member) {
 		// console.log("member",member);
 		// console.log("err", err);
-		const result = await modelCall(memberModel.socialCallback, req, res,  err, member);
+		const result = await modelCall(memberModel.socialCallback, req, res, err, member);
 		res.end(result);
 	})(req, res);
 });
 
-router.post('/checkPassword', async (req, res)=>{
+router.post('/checkPassword', async (req, res) => {
 	const result = await modelCall(memberModel.checkPassword, req);
 	res.json(result);
 });
+
+router.get('/', async (req, res) => {
+	const result = await modelCall(memberModel.getMembers, req);
+	res.json(result);
+})
 
 module.exports = router;

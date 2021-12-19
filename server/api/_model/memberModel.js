@@ -6,7 +6,7 @@ const path = require('path');
 
 const sqlHelper = require('../../../util/sqlHelper');
 const TABLE = require('../../../util/TABLE');
-const { LV } = require('../../../util/level');
+const { LV, isGrant } = require('../../../util/level');
 const moment = require('../../../util/moment');
 const { getIp } = require('../../../util/lib');
 
@@ -385,7 +385,21 @@ const memberModel = {
 		} else {
 			return true;
 		}
+	},
+	async getMembers(req) {
+		if (!isGrant(req, LV.ADMIN)) {
+			throw new Error('회원 목록 권한이 없습니다.');
+		}
+		const options = req.query;
+		const sql = sqlHelper.SelectLimit(TABLE.MEMBER, options);
+		const [items] = await db.execute(sql.query);
+		const [[{ totalItems }]] = await db.execute(sql.countQuery);
+		items.forEach(item => {
+			clearMemberField(item);
+		});
+		return { items, totalItems, sql, options };
 	}
+
 }
 
 module.exports = memberModel;
