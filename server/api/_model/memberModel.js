@@ -102,7 +102,7 @@ const memberModel = {
 		// 레벨은 관리자 모드 amdMode true
 		const admMode = payload.admMode;
 		const mb_id = payload.mb_id;
-		const deleteImage = payload.deleteImage;
+		const deleteImage = typeof (payload.deleteImage) == 'string' ? payload.deleteImage == 'true' : payload.deleteImage;
 		delete payload.admMode;
 		delete payload.mb_id;
 		delete payload.deleteImage;
@@ -155,6 +155,7 @@ const memberModel = {
 				}
 			});
 		}
+		console.log(payload);
 		const sql = sqlHelper.Update(TABLE.MEMBER, payload, { mb_id });
 		const [row] = await db.execute(sql.query, sql.values);
 
@@ -392,8 +393,8 @@ const memberModel = {
 		}
 		const options = req.query;
 		const sql = sqlHelper.SelectLimit(TABLE.MEMBER, options);
-		const [items] = await db.execute(sql.query);
-		const [[{ totalItems }]] = await db.execute(sql.countQuery);
+		const [items] = await db.execute(sql.query, sql.values);
+		const [[{ totalItems }]] = await db.execute(sql.countQuery, sql.values);
 		items.forEach(item => {
 			clearMemberField(item);
 		});

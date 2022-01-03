@@ -31,10 +31,12 @@ export default {
   },
   methods: {
     open() {
+			this.$emit('onOpen');
       this.dialog = true;
     },
     close() {
       this.dialog = false;
+			this.$emit('onClose');
     },
   },
 };
