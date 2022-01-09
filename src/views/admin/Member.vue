@@ -32,6 +32,30 @@
       :loading="loading"
       hide-default-footer
     >
+      <template v-slot:item.mb_id="{ item }">
+        <display-id :member="item" />
+      </template>
+
+      <template v-slot:item.mb_name="{ item }">
+        <display-name :member="item" />
+      </template>
+
+      <template v-slot:item.mb_level="{ item }">
+        <display-level :member="item" />
+      </template>
+
+      <template v-slot:item.mb_create_at="{ item }">
+        <display-time :time="item.mb_create_at" />
+      </template>
+
+			<template v-slot:item.mb_update_at="{ item }">
+        <display-time :time="item.mb_update_at" />
+      </template>
+
+			<template v-slot:item.mb_leave_at="{ item }">
+        <display-time :time="item.mb_leave_at" />
+      </template>
+
       <template v-slot:item.cmd="{ item }">
         <tooltip-btn icon label="수정" @click="openDialog(item)">
           <v-icon>mdi-pencil</v-icon>
@@ -57,8 +81,10 @@
         :member="curMember"
         :isLoading="loading"
         :admMode="true"
+        :isType="options.type"
         @onSave="saveMember"
         @onLeave="leaveMember"
+        @onRestore="restoreMember"
       />
     </ez-dialog>
   </v-container>
@@ -72,9 +98,22 @@ import TooltipBtn from "../../components/etc/TooltipBtn.vue";
 import EzDialog from "../../components/etc/EzDialog.vue";
 import UserUpdateForm from "../../components/Auth/UserUpdateForm.vue";
 import { deepCopy } from "../../../util/lib";
+import DisplayId from "../../components/layout/DisplayId.vue";
+import DisplayName from "../../components/layout/DisplayName.vue";
+import DisplayLevel from "../../components/layout/DisplayLevel.vue";
+import DisplayTime from "../../components/layout/DisplayTime.vue";
 
 export default {
-  components: { SearchField, TooltipBtn, EzDialog, UserUpdateForm },
+  components: {
+    SearchField,
+    TooltipBtn,
+    EzDialog,
+    UserUpdateForm,
+    DisplayId,
+    DisplayName,
+    DisplayLevel,
+    DisplayTime,
+  },
   name: "admMember",
   data() {
     return {
@@ -82,6 +121,12 @@ export default {
         {
           text: "아이디",
           value: "mb_id",
+          align: "start",
+          searchable: true,
+        },
+        {
+          text: "이름",
+          value: "mb_name",
           align: "start",
           searchable: true,
         },
@@ -290,6 +335,28 @@ export default {
       const data = await this.$axios.patch(`/api/member`, form);
       if (data) {
         this.$toast.info(`${this.curMember.mb_name}님 탈퇴 처리 하였습니다.`);
+        this.$refs.dialog.close();
+        this.pageRouting = true;
+        this.fetchData();
+      }
+    },
+    async restoreMember() {
+      const result = await this.$ezNotify.confirm(
+        `${this.curMember.mb_name}님 회원 복원 처리 하시겠습니까?`,
+        "회원 복원 처리",
+        {
+          icon: "mdi-alert",
+        }
+      );
+      if (!result) return;
+      this.loading = true;
+      const form = {
+        mb_id: this.curMember.mb_id,
+        mb_leave_at: null,
+      };
+      const data = await this.$axios.patch(`/api/member`, form);
+      if (data) {
+        this.$toast.info(`${this.curMember.mb_name}님 복원 하였습니다.`);
         this.$refs.dialog.close();
         this.pageRouting = true;
         this.fetchData();

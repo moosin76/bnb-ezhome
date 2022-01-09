@@ -1,5 +1,5 @@
 <template>
-  <v-avatar color="accent" size="32">
+  <v-avatar color="accent" :size="size">
     <template v-if="member">
       <v-img
         v-if="hasImage"
@@ -19,6 +19,10 @@ export default {
 		member : {
 			type: Object,
 			default : null
+		},
+		size : {
+			type : [String, Number],
+			default : 32
 		}
 	},
 	data() {
@@ -33,12 +37,12 @@ export default {
 	},
 	computed : {
 		memberPhoto() {
-			if(this.member.mb_provier) {
+			if(this.member.mb_photo && !this.member.mb_photo.startsWith('/upload')) {
 				return this.member.mb_photo;
 			} else {
 				// 경로.jpg?v=1&w=32&h=32
 				// console.log(this.member.mb_photo);
-				return this.member.mb_photo + '?w=32&h=32';
+				return this.member.mb_photo + `?w=${this.size}&h=${this.size}`;
 			}
 			// return this.member.mb_photo || `/upload/memberPhoto/${this.member.mb_id}.jpg?w=32&h=32`
 		}
