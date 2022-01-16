@@ -37,6 +37,7 @@ export default {
 			admMenus :[
 				{title : '설정 관리', icon : 'mdi-cog', to: '/adm/config'},
 				{title : '회원 관리', icon : 'mdi-account-cog', to: '/adm/member'},
+				{title : '메뉴 관리', icon : 'mdi-menu', to: '/adm/menu'},
 			]
 		};
 	},

@@ -41,7 +41,7 @@
       </template>
 
       <template v-slot:item.mb_level="{ item }">
-        <display-level :member="item" />
+        <display-level :level="item.mb_level" />
       </template>
 
       <template v-slot:item.mb_create_at="{ item }">
@@ -53,7 +53,7 @@
       </template>
 
 			<template v-slot:item.mb_leave_at="{ item }">
-        <display-time :time="item.mb_leave_at" />
+        <display-time v-if="item.mb_leave_at" :time="item.mb_leave_at" />
       </template>
 
       <template v-slot:item.cmd="{ item }">
@@ -189,7 +189,7 @@ export default {
       return this.headers.filter((item) => item.searchable);
     },
     headers() {
-      return this.options.type == "member"
+			return this.options.type == "member"
         ? this.headersOrigin.filter((item) => item.value != "mb_leave_at")
         : this.headersOrigin.filter((item) => item.value != "mb_update_at");
     },
