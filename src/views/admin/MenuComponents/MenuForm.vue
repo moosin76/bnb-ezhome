@@ -36,6 +36,7 @@
 <script>
 import InputLevel from "../../../components/InputForms/InputLevel.vue";
 import validateRules from "../../../../util/validateRules";
+import { deepCopy } from '../../../../util/lib';
 export default {
   components: { InputLevel },
   name: "MenuForm",
@@ -66,6 +67,7 @@ export default {
   methods: {
     init() {
       if (this.item) {
+				this.form = deepCopy(this.item);
       } else {
         this.form = {
           grant: 0,
@@ -82,7 +84,8 @@ export default {
 			this.$refs.form.validate();
 			await this.$nextTick();
 			if(!this.valid) return;
-			console.log(this.form);
+			this.$emit('save', this.form);
+			this.init();
 		}
   },
 };
