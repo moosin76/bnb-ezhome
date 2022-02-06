@@ -315,6 +315,9 @@ export default {
         const idx = this.items.indexOf(this.curMember);
         this.items.splice(idx, 1, data);
         this.$toast.info(`${data.mb_name} 정보 수정 하였습니다.`);
+				// console.log(data);
+				// 소켓을 보내면 회원아이디 룸에
+				this.$socket.emit("member:admUpdate", data);
         this.$refs.dialog.close();
       }
     },

@@ -155,7 +155,7 @@ const memberModel = {
 				}
 			});
 		}
-		console.log(payload);
+		// console.log(payload);
 		const sql = sqlHelper.Update(TABLE.MEMBER, payload, { mb_id });
 		const [row] = await db.execute(sql.query, sql.values);
 
