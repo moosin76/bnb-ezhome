@@ -56,7 +56,7 @@
       <v-slider
         v-model="form.mb_level"
         :min="LV.BLOCK"
-        :max="LV.SUPER"
+        :max="isGrant ? LV.SUPER : admin.mb_level"
         ticks="always"
         thumb-label
         prepend-icon="mdi-chevron-triple-up"
@@ -105,7 +105,13 @@
       :required="!admMode"
     />
 
-    <v-btn type="submit" block color="primary" :loading="isLoading">
+    <v-btn
+      type="submit"
+      block
+      color="primary"
+      :loading="isLoading"
+      :disabled="isGrant"
+    >
       회원수정
     </v-btn>
 
@@ -116,17 +122,19 @@
       color="error"
       :loading="isLoading"
       @click="$emit('onLeave')"
+      :disabled="isGrant"
     >
       회원탈퇴
     </v-btn>
 
     <v-btn
-			v-else
+      v-else
       block
       class="mt-4"
       color="error"
       :loading="isLoading"
       @click="$emit('onRestore')"
+      :disabled="isGrant"
     >
       회원 탈퇴 복원
     </v-btn>
@@ -144,6 +152,7 @@ import InputPost from "../InputForms/InputPost.vue";
 import { deepCopy } from "../../../util/lib";
 import DisplayAvatar from "../layout/DisplayAvatar.vue";
 import { LV, LV_LABEL, LV_COLOR } from "../../../util/level";
+import { mapGetters, mapState } from "vuex";
 
 export default {
   components: {
@@ -196,6 +205,19 @@ export default {
     lvLabel() {
       return LV_LABEL(this.form.mb_level);
     },
+    ...mapState({
+      admin: (state) => state.user.member,
+    }),
+    ...mapGetters("user", ["isSuper"]),
+    isGrant() {
+      return !(
+        (
+          this.admin.mb_id == this.member.mb_id || //나 자신
+          this.isSuper || // 최고관리자
+          this.member.mb_level < this.admin.mb_level
+        ) // 나보다 레벨이 낮은 사용자
+      );
+    },
   },
   created() {
     this.form = deepCopy(this.member);
@@ -209,6 +231,7 @@ export default {
     delete this.form.mb_login_at;
     delete this.form.mb_login_ip;
     delete this.form.mb_leave_at;
+    console.log("isGrant", this.isGrant, this.isSuper);
   },
 
   methods: {
