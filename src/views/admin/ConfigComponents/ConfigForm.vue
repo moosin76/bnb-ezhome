@@ -1,5 +1,5 @@
 <template>
-  <v-form @submit.prevent="save" ref="form" v-model="valid" lazy-validation>
+  <v-form v-if="member" @submit.prevent="save" ref="form" v-model="valid" lazy-validation>
     <v-combobox
       v-model="form.cf_group"
       :items="groupItems"
@@ -46,7 +46,7 @@
       :label="`접근레벨 (${form.cf_level})`"
       v-model="form.cf_level"
       :min="LV.ADMIN"
-      :max="LV.SUPER"
+      :max="member.mb_level"
       thumb-color="primary"
       thumb-label
     />
@@ -63,6 +63,7 @@ import { LV } from "../../../../util/level";
 import validateRules from "../../../../util/validateRules";
 import { deepCopy, findParentVm } from "../../../../util/lib";
 import jsonStringify from "json-stable-stringify";
+import { mapState } from 'vuex';
 
 export default {
   components: { InputDuplicateCheck, TypeValue },
@@ -92,6 +93,9 @@ export default {
   computed: {
     LV: () => LV,
     rules: () => validateRules,
+		...mapState({
+			member : state => state.user.member
+		}),
   },
   created() {
     this.init();
