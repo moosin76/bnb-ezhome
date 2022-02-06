@@ -1,5 +1,10 @@
 <template>
   <div>
+		<!-- 회원정보 출력 -->
+		<v-card-text class="text-subtitle-1">
+			<b>{{member.mb_name}}</b>
+			({{LV_LABEL(member.mb_level)}})
+		</v-card-text>
     <!-- 관리자 메뉴 -->
     <v-list v-if="isAdmin" dense>
       <v-subheader>관리자 메뉴</v-subheader>
@@ -77,6 +82,7 @@ export default {
       member: (state) => state.user.member,
     }),
     ...mapGetters("user", ["isAdmin", "isSuper"]),
+		LV_LABEL : () => LV_LABEL
   },
   methods: {
     ...mapMutations("user", ["SET_MEMBER"]),
