@@ -38,6 +38,9 @@
                 <v-icon>mdi-chevron-down</v-icon>
               </v-btn>
               <!-- 컨텐츠 내용 -->
+							<v-icon v-if="item.isHide" color="grey">mdi-eye-off</v-icon>
+							<v-icon v-else color="primary" >mdi-eye</v-icon>
+
               <v-text-field
                 label="title"
                 v-model="item.title"
