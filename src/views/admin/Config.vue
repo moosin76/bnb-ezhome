@@ -85,6 +85,7 @@ import draggable from "vuedraggable";
 export default {
   components: { TooltipBtn, EzDialog, ConfigForm, ConfigItem, draggable },
   name: "admConfig",
+	title : "설정 관리",
   data() {
     return {
       items: [],

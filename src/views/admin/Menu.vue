@@ -44,6 +44,7 @@ import NestedDragMenu from "./MenuComponents/NestedDragMenu.vue";
 export default {
   components: { TooltipBtn, NestedDragMenu, EzDialog, MenuForm },
   name: "AdmMenu",
+	title : "메뉴관리",
   data() {
     return {
       items: [],
