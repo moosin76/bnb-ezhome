@@ -12,19 +12,24 @@
         v-model="form.bo_table"
         counter="30"
         :readonly="!!table"
+				:rules="[rules.alphaNum(), rules.require({label:'게시판 ID'})]"
       />
       <v-text-field
         label="게시판 제목"
         v-model="form.bo_subject"
         counter="100"
+				:rules="[rules.require({label:'게시판 제목'})]"
       />
       <v-select label="게시판 스킨" v-model="form.bo_skin" :items="skins" />
       <!-- 정렬 규칙 -->
+			<board-sort :items="form.bo_sort"/>
+
       <div class="d-flex">
         <v-switch label="카테고리 사용" v-model="form.bo_use_category" inset />
         <div style="flex: 1" class="ml-3">
           <v-combobox
             label="카테고리"
+						v-model="form.bo_category"
             multiple
             chips
             :disabled="!form.bo_use_category"
@@ -121,9 +126,10 @@
 import { LV } from "../../../../util/level";
 import TooltipBtn from "../../../components/etc/TooltipBtn.vue";
 import BoardSlider from "./Components/BoardSlider.vue";
-
+import BoardSort from './Components/BoardSort.vue';
+import validateRules from '../../../../util/validateRules';
 export default {
-  components: { TooltipBtn, BoardSlider },
+  components: { TooltipBtn, BoardSlider, BoardSort },
   name: "AdmBoardForm",
   props: {
     table: String,
@@ -145,9 +151,11 @@ export default {
     btnLabel() {
       return this.table ? "수정" : "생성";
     },
+		rules : () => validateRules,
   },
   mounted() {
     this.init();
+		this.fetchSkinList();
   },
   methods: {
     init() {
@@ -182,8 +190,16 @@ export default {
         this.form = form;
       }
     },
-		save() {
+		async fetchSkinList() {
+			const data = await this.$axios.get('/api/adm/board/skinlist');
+			this.skins = data;
+		},
+		async save() {
+			this.$refs.form.validate();
+			await this.$nextTick();
+			if(!this.valid) return;
 			console.log(this.form);
+			// TODO : 서버로 데이타 보내서 게시판 생성 하자
 		}
   },
 };

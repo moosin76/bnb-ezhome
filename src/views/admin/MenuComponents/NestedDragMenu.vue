@@ -150,28 +150,5 @@ export default {
 </script>
 
 <style>
-.menu-drag-container .menu-drag-item {
-  position: relative;
-}
-.menu-drag-container .menu-drag-item .icon {
-  display: none;
-}
 
-.menu-drag-container .menu-drag-subitem {
-  margin-left: 2rem;
-}
-
-.menu-drag-container .menu-drag-subitem .menu-drag-item .icon {
-  display: block;
-  position: absolute;
-  left: -1.75rem;
-  top: 1.5rem;
-}
-
-.menu-drag-container .handle {
-  cursor: grab;
-}
-.menu-drag-container .menu-drag-zone {
-  padding-bottom: 1rem;
-}
 </style>
