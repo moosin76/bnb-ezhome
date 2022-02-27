@@ -63,6 +63,7 @@ require('./plugins/pm2Bus');
 	// 글로벌 
 	global.MEMBER_PHOTO_PATH = path.join(__dirname, './upload/memberPhoto');
 	fs.mkdirSync(MEMBER_PHOTO_PATH, {recursive: true});
+	global.UPLOAD_PATH = path.join(__dirname, './upload');
 
 	// Passport
 	const passport = require('./plugins/passport');

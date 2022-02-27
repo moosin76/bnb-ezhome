@@ -12,24 +12,24 @@
         v-model="form.bo_table"
         counter="30"
         :readonly="!!table"
-				:rules="[rules.alphaNum(), rules.require({label:'게시판 ID'})]"
+        :rules="[rules.alphaNum(), rules.require({ label: '게시판 ID' })]"
       />
       <v-text-field
         label="게시판 제목"
         v-model="form.bo_subject"
         counter="100"
-				:rules="[rules.require({label:'게시판 제목'})]"
+        :rules="[rules.require({ label: '게시판 제목' })]"
       />
       <v-select label="게시판 스킨" v-model="form.bo_skin" :items="skins" />
       <!-- 정렬 규칙 -->
-			<board-sort :items="form.bo_sort"/>
+      <board-sort :items="form.bo_sort" />
 
       <div class="d-flex">
         <v-switch label="카테고리 사용" v-model="form.bo_use_category" inset />
         <div style="flex: 1" class="ml-3">
           <v-combobox
             label="카테고리"
-						v-model="form.bo_category"
+            v-model="form.bo_category"
             multiple
             chips
             :disabled="!form.bo_use_category"
@@ -84,7 +84,7 @@
 
       <v-expansion-panels focusable>
         <v-expansion-panel>
-          <v-expansion-panel-header >
+          <v-expansion-panel-header>
             게시물 추가 필드 설정
           </v-expansion-panel-header>
           <v-expansion-panel-content>
@@ -97,24 +97,27 @@
                 </template>
                 <span>필수 입력</span>
               </v-tooltip>
-              <v-text-field :label="`추가 필드 제목 ${i + 1}`" v-model="item.title" />
+              <v-text-field
+                :label="`추가 필드 제목 ${i + 1}`"
+                v-model="item.title"
+              />
             </div>
           </v-expansion-panel-content>
         </v-expansion-panel>
-				<v-expansion-panel>
-					<v-expansion-panel-header>게시판 여분 필드</v-expansion-panel-header>
-					<v-expansion-panel-content>
-						<v-text-field 
-							v-for="i in 10"
-							:label="`여분 필드 ${i}`"
-							v-model="form[`bo_${i}`]"
-							:key="i"
-						/>
-					</v-expansion-panel-content>
-				</v-expansion-panel>
+        <v-expansion-panel>
+          <v-expansion-panel-header>게시판 여분 필드</v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <v-text-field
+              v-for="i in 10"
+              :label="`여분 필드 ${i}`"
+              v-model="form[`bo_${i}`]"
+              :key="i"
+            />
+          </v-expansion-panel-content>
+        </v-expansion-panel>
       </v-expansion-panels>
     </v-form>
-		<v-toolbar class="mt-4">
+    <v-toolbar class="mt-4">
       <v-btn to="/adm/board/list" color="accent">목록</v-btn>
       <v-spacer></v-spacer>
       <v-btn color="primary" class="ml-2" @click="save">{{ btnLabel }}</v-btn>
@@ -126,8 +129,8 @@
 import { LV } from "../../../../util/level";
 import TooltipBtn from "../../../components/etc/TooltipBtn.vue";
 import BoardSlider from "./Components/BoardSlider.vue";
-import BoardSort from './Components/BoardSort.vue';
-import validateRules from '../../../../util/validateRules';
+import BoardSort from "./Components/BoardSort.vue";
+import validateRules from "../../../../util/validateRules";
 export default {
   components: { TooltipBtn, BoardSlider, BoardSort },
   name: "AdmBoardForm",
@@ -151,16 +154,21 @@ export default {
     btnLabel() {
       return this.table ? "수정" : "생성";
     },
-		rules : () => validateRules,
+    rules: () => validateRules,
   },
   mounted() {
     this.init();
-		this.fetchSkinList();
+    this.fetchSkinList();
   },
   methods: {
-    init() {
+    async init() {
       if (this.table) {
         // 수정 : 게시물 정보를 가지고 와서 넣주자
+        const data = await this.$axios.get(`/api/adm/board/${this.table}`);
+        data.bo_category = JSON.parse(data.bo_category);
+        data.bo_sort = JSON.parse(data.bo_sort);
+        data.wr_fields = JSON.parse(data.wr_fields);
+        this.form = data;
       } else {
         // 신규
         const form = {
@@ -190,17 +198,30 @@ export default {
         this.form = form;
       }
     },
-		async fetchSkinList() {
-			const data = await this.$axios.get('/api/adm/board/skinlist');
-			this.skins = data;
-		},
-		async save() {
-			this.$refs.form.validate();
-			await this.$nextTick();
-			if(!this.valid) return;
-			console.log(this.form);
-			// TODO : 서버로 데이타 보내서 게시판 생성 하자
-		}
+    async fetchSkinList() {
+      const data = await this.$axios.get("/api/adm/board/skinlist");
+      this.skins = data;
+    },
+    async save() {
+      this.$refs.form.validate();
+      await this.$nextTick();
+      if (!this.valid) return;
+      // console.log(this.form);
+
+      let data = false;
+      if (this.table) {// 수정
+				data = await this.$axios.put(`/api/adm/board/${this.table}`, this.form);
+      } else { // 생성
+        data = await this.$axios.post("/api/adm/board", this.form);
+      }
+			
+      if (data) {
+        this.$toast.info(
+          `${this.form.bo_subject} 게시판을 ${this.btnLabel}하였습니다.`
+        );
+        this.$router.push("/adm/board/list");
+      }
+    },
   },
 };
 </script>
