@@ -1,4 +1,4 @@
-import Home from '../views/Home.vue'
+import Home from '../views/Home.vue';
 
 const routes = [
   {
@@ -45,6 +45,11 @@ const routes = [
     path: '/adm/board/*',
     name: 'AdmBoard',
   	component: () => import(/* webpackChunkName: "admBoard" */ '../views/admin/BoardRenderer.vue')
+  },
+	{
+    path: '/board/*',
+    name: 'Board',
+  	component: () => import(/* webpackChunkName: "board" */ '../views/board/Board.vue')
   },
 	{
     path: '*',
