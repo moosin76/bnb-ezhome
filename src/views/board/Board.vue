@@ -1,5 +1,5 @@
 <template>
-  <component :is="curSkin" :config="config" :access="access" :wr_id="wr_id" />
+  <component :is="curSkin" :config="config" :access="access" :id="wr_id" />
 </template>
 
 <script>

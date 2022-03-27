@@ -38,7 +38,7 @@ const sqlHelper = {
 		// 검색 
 		let where = "";
 		let whereArr = [];
-		let values=[];
+		let values = [];
 		if (options.stf && options.stx && options.stc) {
 			for (let i in options.stf) {
 				const field = options.stf[i];
@@ -57,29 +57,29 @@ const sqlHelper = {
 							whereArr.push(` ${field} IS NOT NULL `);
 							break;
 						case 'lt':
-							whereArr.push(` ${field} < ? ` );
+							whereArr.push(` ${field} < ? `);
 							values.push(text);
-						break;
+							break;
 						case 'lte':
-							whereArr.push(` ${field} <= ? ` );
+							whereArr.push(` ${field} <= ? `);
 							values.push(text);
-						break;
+							break;
 						case 'eq':
-							whereArr.push(` ${field} = ? ` );
+							whereArr.push(` ${field} = ? `);
 							values.push(text);
-						break;
+							break;
 						case 'ne':
-							whereArr.push(` ${field} != ? ` );
+							whereArr.push(` ${field} != ? `);
 							values.push(text);
-						break;
+							break;
 						case 'gt':
-							whereArr.push(` ${field} > ? ` );
+							whereArr.push(` ${field} > ? `);
 							values.push(text);
-						break;
+							break;
 						case 'gte':
-							whereArr.push(` ${field} >= ? ` );
+							whereArr.push(` ${field} >= ? `);
 							values.push(text);
-						break;
+							break;
 					}
 				}
 			}
@@ -135,6 +135,24 @@ const sqlHelper = {
 		query = query.replace('{1}', keys.join(', '));
 		query = query.replace('{2}', prepare);
 		return { query, values };
+	},
+	InsertArray(table, datas) {
+		let sql;
+		let prepare; // (?,?,?)
+		for (const i in datas) {
+			const data = datas[i];
+			const keys = Object.keys(data);
+			if(i == 0) {
+				sql = sqlHelper.Insert(table, data);
+				prepare = new Array(keys.length).fill('?').join(', ');
+			} else {
+				sql.query += `, (${prepare})`;
+				for(const key of keys) {
+					sql.values.push(data[key]);
+				}
+			}
+		}
+		return sql;
 	},
 	Update(table, data, where) {
 		let query = `UPDATE ${table} SET {1} WHERE {2}`;

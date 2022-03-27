@@ -1,21 +1,21 @@
 const lib = {
 	deepCopy(obj) {
-		if(obj === null || typeof obj !== 'object') {
+		if (obj === null || typeof obj !== 'object') {
 			return obj;
 		}
 		const result = Array.isArray(obj) ? [] : {};
-		for(const key of Object.keys(obj)) {
+		for (const key of Object.keys(obj)) {
 			result[key] = lib.deepCopy(obj[key]);
 		}
 		return result;
 	},
-	modelCall : async (fn, ...args) => {
+	modelCall: async (fn, ...args) => {
 		try {
 			const result = await fn(...args);
 			return result;
-		} catch(e) {
+		} catch (e) {
 			console.trace(e);
-			return {err : e.message}
+			return { err: e.message }
 		}
 	},
 	getIp(req) {
@@ -23,14 +23,21 @@ const lib = {
 	},
 	findParentVm(vm, target) {
 		let parent = vm.$parent;
-		while(parent.$vnode) {
+		while (parent.$vnode) {
 			// console.log(parent.$vnode.tag);
-			if(parent.$vnode.tag.endsWith(target)) {
+			if (parent.$vnode.tag.endsWith(target)) {
 				return parent;
 			}
 			parent = parent.$parent;
 		}
 		return null;
+	},
+	getSummary(content, len = 300) {
+		let text = content.replace(/(<([^>]+)>)/ig, "");
+		if(text.length > len) {
+			text = text.substr(0, len-3) + "...";
+		}
+		return text;
 	}
 }
 
