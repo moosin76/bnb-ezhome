@@ -58,7 +58,9 @@ export default {
         const prefix = upperFirst(this.config.bo_skin);
         if (this.action == "list" && this.access.list) {
           return `${prefix}List`;
-        } else if (this.action == "write" && this.access.write) {
+        } else if (this.access.write && this.action == "write" ) {
+          return `${prefix}Form`;
+        } else if (this.access.reply && this.action == "reply" ) {
           return `${prefix}Form`;
         } else if (this.wr_id && this.action == "read" && this.access.read) {
           return `${prefix}Read`;

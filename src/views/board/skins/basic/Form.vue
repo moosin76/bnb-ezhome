@@ -16,6 +16,7 @@
         v-model="form.wr_category"
         :items="config.bo_category"
         :rules="[rules.require({ label: '카데고리' })]"
+				:readonly="!!parentItem"
       ></v-select>
       <template v-if="!member">
         <v-text-field
@@ -40,6 +41,17 @@
           :rules="[rules.matchValue(form.wr_password)]"
         />
       </template>
+
+			<v-expansion-panels v-if="parentItem">
+				<v-expansion-panel>
+					<v-expansion-panel-header>
+						부모글 : {{parentItem.wr_title}}
+					</v-expansion-panel-header>
+					<v-expansion-panel-content>
+						<ez-tiptap v-model="parentItem.wr_content" :editable="false"/>
+					</v-expansion-panel-content>
+				</v-expansion-panel>
+			</v-expansion-panels>
 
       <v-text-field
         label="제목"
@@ -78,7 +90,19 @@
           :label="fileTitle(i)"
           v-model="uploadFiles[i - 1]"
           show-size
+          :disabled="
+            form.wrFiles && form.wrFiles[i - 1]
+              ? !form.wrFiles[i - 1].remove
+              : false
+          "
         />
+        <div v-if="form.wrFiles && form.wrFiles[i - 1]">
+          <v-checkbox
+            v-model="form.wrFiles[i - 1].remove"
+            label="삭제"
+            @change="uploadFiles[i - 1] = null"
+          />
+        </div>
       </div>
     </v-form>
   </v-container>
@@ -108,8 +132,9 @@ export default {
       uploadFiles: Array(this.config.bo_upload_cnt).fill(null),
       tags: [], // TODO : 서버에서 태그 목록을 가져온다.
       loading: false,
-			upImages : [],
-			isWrite : false, // 작성을 했는지 여부
+      upImages: [],
+      isWrite: false, // 작성을 했는지 여부
+			parentItem : null, // 부모글
     };
   },
   computed: {
@@ -118,6 +143,13 @@ export default {
     }),
     table() {
       return this.config.bo_table;
+    },
+    pid() {
+      if (this.$route.query.act == "reply") {
+        return this.id;
+      } else {
+        return 0;
+      }
     },
     pageTitle() {
       return (
@@ -129,23 +161,34 @@ export default {
   mounted() {
     this.init();
   },
-	destroyed() {
-		// 작성을 완료하지 않고 에디터에서 업로드한 이미지가 있으면 삭제를 요청함
-		if(!this.isWrite && this.upImages.length) {
-			this.$axios.put(`/api/board/imgCancle/${this.table}`, this.upImages);
-		}
-	},
+  destroyed() {
+    // 작성을 완료하지 않고 에디터에서 업로드한 이미지가 있으면 삭제를 요청함
+    if (!this.isWrite && this.upImages.length) {
+      this.$axios.put(`/api/board/imgCancle/${this.table}`, this.upImages);
+    }
+  },
   methods: {
     async init() {
       if (this.id) {
-      } else {
+        const data = await this.$axios.get(
+          `/api/board/read/${this.table}/${this.id}`
+        );
+        if (this.pid) { // 부모글의 답글
+          this.initForm();
+					this.form.wr_category = data.wr_category; // 부모글의 카데고리를 따라감
+					this.parentItem = data;
+        } else { // 수정
+          this.form = data;
+        }
+      } else { // 새글
         this.initForm();
       }
+      //	console.log(this.form);
     },
     initForm() {
       const form = {
         wr_reply: 0,
-        wr_parent: 0, // TODO : 나중에 답글 작성할때 부모글 아이들 넣음
+        wr_parent: this.pid, //  답글 작성할때 부모글 아이들 넣음
         mb_id: this.member ? this.member.mb_id : 0, // 0이면 비회원 글 작성임
         wr_email: this.member ? this.member.mb_email : "",
         wr_name: this.member ? this.member.mb_name : "",
@@ -154,6 +197,8 @@ export default {
         wr_title: "",
         wr_content: "",
         wrTags: [],
+        // wrImgs: [],
+        // wrFiles: [],
       };
       for (let i = 1; i <= 10; i++) {
         form[`wr_${i}`] = "";
@@ -162,7 +207,12 @@ export default {
     },
     fileTitle(i) {
       //  TODO : 수정 할때 올렷던 파일 이름 요기서 사용할꺼에요
-      return `첨부파일 ${i}`;
+      if (this.form.wrFiles) {
+        const wrFile = this.form.wrFiles[i - 1];
+        return wrFile && !wrFile.remove ? wrFile.bf_name : `첨부파일 ${i}`;
+      } else {
+        return `첨부파일 ${i}`;
+      }
     },
     async uploadImage({ file, desc, callback }) {
       const formData = new FormData();
@@ -172,7 +222,7 @@ export default {
         `/api/board/imageUpload/${this.table}`,
         formData
       );
-			this.upImages.push(data);
+      this.upImages.push(data);
       callback(`/upload/${this.table}/${data.bf_src}`);
     },
     async save() {
@@ -200,29 +250,38 @@ export default {
         }
       }
 
-			// 에디터에서 업로드한 이미지
-			formData.append('upImages', JSON.stringify(this.upImages));
+      // 에디터에서 업로드한 이미지
+      formData.append("upImages", JSON.stringify(this.upImages));
 
       let wr_id;
-      if (this.id) {
+      if (this.id && !this.pid ) {
         wr_id = await this.update(formData);
       } else {
         wr_id = await this.insert(formData);
       }
 
-			// 글작성이 잘 끝났으면
-			if(wr_id) {
-				this.isWrite = true;
-				this.$router.push(`/board/${this.table}/${wr_id}`);
-			}
+      // 글작성이 잘 끝났으면
+      if (wr_id) {
+        this.isWrite = true;
+        this.$router.push(`/board/${this.table}/${wr_id}`);
+      }
 
       this.loading = false;
     },
     async insert(formData) {
-			const data = await this.$axios.post(`/api/board/write/${this.table}`, formData);
-			return data.wr_id;
-		},
-		async update(formData) {},
+      const data = await this.$axios.post(
+        `/api/board/write/${this.table}`,
+        formData
+      );
+      return data.wr_id;
+    },
+    async update(formData) {
+      const data = await this.$axios.put(
+        `/api/board/write/${this.table}/${this.id}`,
+        formData
+      );
+      return data.wr_id;
+    },
   },
 };
 </script>

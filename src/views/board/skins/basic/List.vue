@@ -23,6 +23,12 @@
           plain
           class="justify-start pl-0"
         >
+					<v-icon
+						v-if="item.wr_dep > 0"
+						:style="{'padding-left': `${(item.wr_dep - 1) * 16}px`}"
+					>
+					mdi-subdirectory-arrow-right
+					</v-icon>
           <div>{{ item.wr_title }}</div>
         </v-btn>
       </template>
@@ -73,6 +79,11 @@ export default {
           searchable: false,
 					width : "60"
         },
+				// {text: "ID",value : 'wr_id'},
+				// {text: "GRP",value : 'wr_grp'},
+				// {text: "ORD",value : 'wr_order'},
+				// {text: "DEP",value : 'wr_dep'},
+				// {text: "PR",value : 'wr_parent'},
         {
           text: "제목",
           value: "wr_title",
@@ -126,6 +137,7 @@ export default {
     getPayload() {
       const payload = deepCopy(this.options);
       // 정렬을 설정값에 있는 정렬로 하자
+			// console.log("정렬",  this.config.bo_sort);
       for (const sort of this.config.bo_sort) {
         payload.sortBy.push(sort.by);
         payload.sortDesc.push(sort.desc == 1);
@@ -142,6 +154,7 @@ export default {
     },
     async fetchData() {
       const payload = this.getPayload();
+			console.log("요청", payload);
       const query = qs.stringify(payload);
       const data = await this.$axios.get(
         `/api/board/list/${this.table}?${query}`
