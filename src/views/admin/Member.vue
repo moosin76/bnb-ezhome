@@ -265,8 +265,8 @@ export default {
         const data = await this.$axios.get(`/api/member?${query}`, {
           cancelToken: this.axiosSource.token,
         });
-        this.pushState();
-
+        
+				this.pushState();
         this.loading = false;
         this.pageReady = true;
         this.pageRouting = false;

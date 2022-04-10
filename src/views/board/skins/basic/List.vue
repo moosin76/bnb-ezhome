@@ -2,6 +2,11 @@
   <v-container>
     <v-toolbar>
       <v-toolbar-title>{{ pageTitle }}</v-toolbar-title>
+      <v-sheet v-if="config.bo_use_category == 1" width="150" class="ml-4">
+        <cate-select :options.sync="options" />
+      </v-sheet>
+      <search-field :items="searchItems" :options.sync="options" class="ml-4" />
+
       <v-spacer />
       <v-btn :to="`/board/${table}?act=write`" color="primary">
         <v-icon left>mdi-pencil</v-icon>
@@ -23,12 +28,12 @@
           plain
           class="justify-start pl-0"
         >
-					<v-icon
-						v-if="item.wr_dep > 0"
-						:style="{'padding-left': `${(item.wr_dep - 1) * 16}px`}"
-					>
-					mdi-subdirectory-arrow-right
-					</v-icon>
+          <v-icon
+            v-if="item.wr_dep > 0"
+            :style="{ 'padding-left': `${(item.wr_dep - 1) * 16}px` }"
+          >
+            mdi-subdirectory-arrow-right
+          </v-icon>
           <div>{{ item.wr_title }}</div>
         </v-btn>
       </template>
@@ -39,8 +44,12 @@
 <script>
 import qs from "qs";
 import { deepCopy } from "../../../../../util/lib";
-import { mapMutations, mapState } from 'vuex';
+import { mapActions, mapMutations, mapState } from "vuex";
+import SearchField from "../../../../components/layout/SearchField.vue";
+import CateSelect from "./component/CateSelect.vue";
+
 export default {
+  components: { SearchField, CateSelect },
   name: "BasicList",
   props: {
     config: Object,
@@ -52,21 +61,16 @@ export default {
   data() {
     return {
       loading: false,
-      items: [],
-      totalItems: 0,
-      options: {
-        itemsPerPage: 10,
-        page: 1,
-        stf: [""],
-        stc: [""],
-        stx: [""],
-      },
+      options: {},
+      pageRouting: false,
+      pageReady: false,
     };
   },
   computed: {
-		...mapState({
-			initData : state => state.initData,
-		}),
+    ...mapState({
+      items: (state) => state.board.list,
+      totalItems: (state) => state.board.totalItems,
+    }),
     table() {
       return this.config.bo_table;
     },
@@ -81,13 +85,13 @@ export default {
           align: "start",
           sortable: false,
           searchable: false,
-					width : "60"
+          width: "60",
         },
-				// {text: "ID",value : 'wr_id'},
-				// {text: "GRP",value : 'wr_grp'},
-				// {text: "ORD",value : 'wr_order'},
-				// {text: "DEP",value : 'wr_dep'},
-				// {text: "PR",value : 'wr_parent'},
+        // {text: "ID",value : 'wr_id'},
+        // {text: "GRP",value : 'wr_grp'},
+        // {text: "ORD",value : 'wr_order'},
+        // {text: "DEP",value : 'wr_dep'},
+        // {text: "PR",value : 'wr_parent'},
         {
           text: "제목",
           value: "wr_title",
@@ -107,14 +111,14 @@ export default {
           value: "wr_createat",
           align: "center",
           sortable: false,
-          searchable: true,
+          searchable: false,
         },
         {
           text: "조회수",
           value: "wr_view",
           align: "center",
           sortable: false,
-          searchable: true,
+          searchable: false,
         },
       ];
       if (this.config.bo_use_category) {
@@ -128,6 +132,14 @@ export default {
       }
       return headers;
     },
+    searchItems() {
+      const arr = this.headers.filter((item) => item.searchable);
+      arr.push({
+        text: "내용",
+        value: "wr_content",
+      });
+      return arr;
+    },
   },
   watch: {
     options: {
@@ -136,60 +148,75 @@ export default {
       },
       deep: true,
     },
+    table() {
+      this.fetchData();
+    },
   },
-	syncData() {
-		// console.log("LIST SYNC DATA CALL");
-		if(this.initData && this.initData.list) {
-			return this.setData(this.initData.list);
-		} else {
-			return this.fetchData();
-		}
-	},
+  serverPrefetch() {
+    return this.fetchData();
+  },
+  created() {
+    this.options = this.initOptions();
+  },
+  mounted() {
+    window.addEventListener("popstate", this.routeChange);
+  },
+  destroyed() {
+    window.removeEventListener("popstate", this.routeChange);
+  },
   methods: {
-		...mapMutations(['SET_INITDATA']),
+    ...mapActions("board", ["getBoardList"]),
+    initOptions() {
+      const { query } = this.$route;
+      const options = {
+        page: Number(query.page) || 1,
+        itemsPerPage: Number(query.itemsPerPage) || 10,
+        stf: [query.stf || "", "wr_category"],
+        stx: [query.stx || "", ""],
+        stc: [query.stc || "", "eq"],
+      };
+      return options;
+    },
+    pushState() {
+      // console.log("PageRouting", this.pageRouting);
+      if (!this.pageRouting) {
+        const opt = {
+          page: this.options.page,
+          itemsPerPage: this.options.itemsPerPage,
+          stf: this.options.stf[0] || undefined,
+          stx: this.options.stx[0] || undefined,
+          stc: this.options.stc[0] || undefined,
+          ca: this.options.stx[1] || undefined,
+        };
+        const query = qs.stringify(opt);
+        if (this.pageReady) {
+          history.pushState(null, null, `${this.$route.path}?${query}`);
+        } else {
+          history.replaceState(null, null, `${this.$route.path}?${query}`);
+        }
+      }
+    },
+    routeChange() {
+      this.pageRouting = true;
+      this.options = this.initOptions();
+    },
     getPayload() {
       const payload = deepCopy(this.options);
-      // 정렬을 설정값에 있는 정렬로 하자
-			// console.log("정렬",  this.config);
-			
-      // for (const sort of this.config.bo_sort) {
-      //   payload.sortBy.push(sort.by);
-      //   payload.sortDesc.push(sort.desc == 1);
-      // }
-
       // 리플이 아닌 목록 검색
       payload.stf.push("wr_reply");
       payload.stc.push("eq");
       payload.stx.push("0");
-
       // TODO : 카데고리 별로도 검색
-
       return payload;
     },
     async fetchData() {
       const payload = this.getPayload();
-			// console.log("요청", payload);
       const query = qs.stringify(payload);
-			
-			const headers = {};
-			if(this.$ssrContext) {
-				headers.token = this.$ssrContext.token;
-			}
-
-      const data = await this.$axios.get(
-        `/api/board/list/${this.table}?${query}`,
-				{ headers }
-      );
-
-			if(this.$ssrContext) {	
-				// console.log("LIST ", data);
-				this.SET_INITDATA({list : data});
-			}
-      this.setData(data);
-    },
-    setData(data) {
-      this.items = data.items;
-      this.totalItems = data.totalItems;
+      const headers = {};
+      if (this.$ssrContext) {
+        headers.token = this.$ssrContext.token;
+      }
+      await this.getBoardList({ vm: this, query, headers });
     },
   },
 };
