@@ -78,7 +78,9 @@ router.put('/write/:bo_table/:wr_id', async (req, res) => {
 
 // 게시판 목록 반환
 router.get('/list/:bo_table', async (req, res) => {
+	
 	const { bo_table } = req.params;
+	// console.log("GET list ==>> " +bo_table);
 	// 권한 확인
 	const config = await modelCall(boardModel.getConfig, bo_table);
 	const grant = isGrant(req, config.bo_list_level);

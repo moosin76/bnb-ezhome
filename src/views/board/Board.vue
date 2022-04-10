@@ -94,7 +94,7 @@ export default {
     async fetchConfig() {
       const data = await this.$axios.get(`/api/board/config/${this.table}`);
       if (this.$ssrContext) {
-        console.log("SET_INITDATA", data.bo_table);
+        // console.log("SET_INITDATA", data.bo_table);
         this.SET_INITDATA({ config: data });
       }
       this.setConfig(data);

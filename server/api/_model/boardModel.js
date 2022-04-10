@@ -100,7 +100,7 @@ const boardModel = {
 			const grpQuery = `SELECT wr_grp, wr_order, wr_dep FROM ${table} WHERE wr_id=${data.wr_parent}`;
 			const [[parent]] = await db.execute(grpQuery);
 			data.wr_grp = parent.wr_grp;
-			data.wr_order = parent.wr_order +1;
+			data.wr_order = parent.wr_order + 1;
 			data.wr_dep = parent.wr_dep + 1;
 			const uSql = `UPDATE ${table} SET wr_order=wr_order+1
 WHERE wr_reply=${data.wr_reply} AND wr_grp=${parent.wr_grp} AND wr_order >= ${data.wr_order}`;
@@ -199,8 +199,16 @@ WHERE wr_reply=${data.wr_reply} AND wr_grp=${parent.wr_grp} AND wr_order >= ${da
 	},
 	async getList(bo_table, config, options, member) {
 		const table = `${TABLE.VIEW}${bo_table}`;
+
+		options.sortBy=[];
+		options.sortDesc=[];
+		for (const sort of config.bo_sort) {
+			options.sortBy.push(sort.by);
+			options.sortDesc.push(sort.desc == 1);
+		}
+
 		const sql = sqlHelper.SelectLimit(table, options);
-		console.log(sql);
+		// console.log(sql);
 		const [items] = await db.execute(sql.query, sql.values);
 		const [[{ totalItems }]] = await db.execute(sql.countQuery, sql.values);
 

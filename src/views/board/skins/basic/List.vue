@@ -39,6 +39,7 @@
 <script>
 import qs from "qs";
 import { deepCopy } from "../../../../../util/lib";
+import { mapMutations, mapState } from 'vuex';
 export default {
   name: "BasicList",
   props: {
@@ -63,6 +64,9 @@ export default {
     };
   },
   computed: {
+		...mapState({
+			initData : state => state.initData,
+		}),
     table() {
       return this.config.bo_table;
     },
@@ -133,15 +137,25 @@ export default {
       deep: true,
     },
   },
+	syncData() {
+		// console.log("LIST SYNC DATA CALL");
+		if(this.initData && this.initData.list) {
+			return this.setData(this.initData.list);
+		} else {
+			return this.fetchData();
+		}
+	},
   methods: {
+		...mapMutations(['SET_INITDATA']),
     getPayload() {
       const payload = deepCopy(this.options);
       // 정렬을 설정값에 있는 정렬로 하자
-			// console.log("정렬",  this.config.bo_sort);
-      for (const sort of this.config.bo_sort) {
-        payload.sortBy.push(sort.by);
-        payload.sortDesc.push(sort.desc == 1);
-      }
+			// console.log("정렬",  this.config);
+			
+      // for (const sort of this.config.bo_sort) {
+      //   payload.sortBy.push(sort.by);
+      //   payload.sortDesc.push(sort.desc == 1);
+      // }
 
       // 리플이 아닌 목록 검색
       payload.stf.push("wr_reply");
@@ -154,11 +168,23 @@ export default {
     },
     async fetchData() {
       const payload = this.getPayload();
-			console.log("요청", payload);
+			// console.log("요청", payload);
       const query = qs.stringify(payload);
+			
+			const headers = {};
+			if(this.$ssrContext) {
+				headers.token = this.$ssrContext.token;
+			}
+
       const data = await this.$axios.get(
-        `/api/board/list/${this.table}?${query}`
+        `/api/board/list/${this.table}?${query}`,
+				{ headers }
       );
+
+			if(this.$ssrContext) {	
+				// console.log("LIST ", data);
+				this.SET_INITDATA({list : data});
+			}
       this.setData(data);
     },
     setData(data) {

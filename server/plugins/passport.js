@@ -120,7 +120,8 @@ module.exports = (app) => {
 	));
 
 	app.use(async (req, res, next) => {
-		const token = req.cookies.token;
+		const token = req.cookies.token || req.headers.token;
+		
 		if (!token) return next();
 		const { mb_id } = jwt.verify(token);
 		if (!mb_id) return next();
