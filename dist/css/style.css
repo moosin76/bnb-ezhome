@@ -46,3 +46,32 @@
 .menu-drag-container .menu-drag-subitem .menu-drag-item .icon {display: block;position: absolute;left: -1.75rem;top: 1.5rem;}
 .menu-drag-container .handle {cursor: grab;}
 .menu-drag-container .menu-drag-zone {padding-bottom: 1rem;}
+
+/* Basic 게시판 */
+@media screen and (min-width: 600px) {
+  .fixedTable table {
+    table-layout: fixed;
+  }
+  .fixedTable .basic-title {
+    width: 100%;
+  }
+  .fixedTable .basic-title > span {
+    display: block;
+    width: 100%;
+  }
+}
+@media screen and (max-width: 600px) {
+  .fixedTable > div {
+    overflow: hidden;
+  }
+  .fixedTable .v-data-table__mobile-table-row {
+    max-width: calc(100vw - 24px);
+  }
+  .fixedTable .v-data-table__mobile-row__header {
+    width: 80px;
+  }
+  .fixedTable .v-data-table__mobile-row__cell .basic-title > span > div {
+    display: block;
+    max-width: calc(100vw - 120px);
+  }
+}

@@ -4,6 +4,7 @@ const db = require('../../plugins/mysql');
 const jwt = require('../../plugins/jwt');
 
 const tagModel = require('./tagModel');
+const goodModel = require('./goodModel');
 
 const sqlHelper = require('../../../util/sqlHelper');
 const TABLE = require('../../../util/TABLE');
@@ -229,7 +230,13 @@ WHERE wr_reply=${data.wr_reply} AND wr_grp=${parent.wr_grp} AND wr_order >= ${da
 		item.wrFiles = files.wrFiles;
 		// 게시물 태그들
 		item.wrTags = await tagModel.getTags(bo_table, wr_id);
-		// TODO : 좋아요 
+		//  좋아요 
+		if(member) {
+			item.goodFlag = await goodModel.getFlag(bo_table, wr_id, member.mb_id);
+		} else {
+			item.goodFlag = 0;
+		}
+		
 
 		delete item.wr_password;
 		return item;

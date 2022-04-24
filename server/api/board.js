@@ -1,3 +1,4 @@
+const fs = require('fs');
 const router = require('express').Router();
 const { isGrant, LV } = require('../../util/level');
 const { modelCall, getIp } = require('../../util/lib');
@@ -67,7 +68,7 @@ router.put('/write/:bo_table/:wr_id', async (req, res) => {
 	// 권한확인
 	const config = await modelCall(boardModel.getConfig, bo_table);
 	const modifyMsg = await isModify(config, req.user, data);
-	
+
 	if (modifyMsg) { // 에러메시지가 있으면 에러
 		return res.json({ err: modifyMsg });
 	}
@@ -78,7 +79,7 @@ router.put('/write/:bo_table/:wr_id', async (req, res) => {
 
 // 게시판 목록 반환
 router.get('/list/:bo_table', async (req, res) => {
-	
+
 	const { bo_table } = req.params;
 	// console.log("GET list ==>> " +bo_table);
 	// 권한 확인
@@ -105,5 +106,29 @@ router.get('/read/:bo_table/:wr_id', async (req, res) => {
 	const result = await modelCall(boardModel.getItem, bo_table, wr_id, req.user);
 	res.json(result);
 });
+
+router.get('/download/:bo_table/:filename', async (req, res) => {
+	const { bo_table, filename } = req.params;
+	const config = await modelCall(boardModel.getConfig, bo_table);
+	const grant = isGrant(req, config.bo_download_level);
+	if (!grant) {
+		return res.status(403).end('No file download permission.');
+	}
+	const { src } = req.query;
+
+	const srcFile = `${UPLOAD_PATH}/${bo_table}/${src}`;
+
+	if (!fs.existsSync(srcFile)) {
+		return res.status(404).end('File not found.');
+	}
+
+	res.download(srcFile, filename);
+});
+
+router.delete('/:bo_table/:wr_id', async (req, res) => {
+	const { bo_table, wr_id } = req.params;
+	const { token } = req.query;
+	res.json({bo_table, wr_id, token});
+})
 
 module.exports = router;

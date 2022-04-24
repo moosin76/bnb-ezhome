@@ -267,32 +267,3 @@ export default {
   },
 };
 </script>
-
-<style>
-@media screen and (min-width: 600px) {
-  .fixedTable table {
-    table-layout: fixed;
-  }
-  .basic-title {
-    width: 100%;
-  }
-  .basic-title > span {
-    display: block;
-    width: 100%;
-  }
-}
-
-@media screen and (max-width: 600px) {
-	.fixedTable > div {overflow: hidden;}
-  .fixedTable .v-data-table__mobile-table-row {
-    max-width: calc(100vw - 24px);
-  }
-  .fixedTable .v-data-table__mobile-row__header {
-    width: 80px;
-  }
-	.fixedTable .v-data-table__mobile-row__cell .basic-title > span > div {
-		display: block;
-    max-width:  calc(100vw - 120px)
-	}
-}
-</style>
