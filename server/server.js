@@ -60,6 +60,14 @@ require('./plugins/pm2Bus');
 	const cookieParser = require('cookie-parser');
 	app.use(cookieParser());
 
+	// 세션
+	const session = require('express-session');
+	app.use(session({
+		secret : siteConfig.SECRET_KEY, // 쿠키 변조 방지에 대한 해쉬
+		resave : true, // 세션을 언제나 저장하는 여부
+		saveUninitialized : false, // 세션 저장전 초기화 안함
+	}));
+
 	// 글로벌 
 	global.MEMBER_PHOTO_PATH = path.join(__dirname, './upload/memberPhoto');
 	fs.mkdirSync(MEMBER_PHOTO_PATH, {recursive: true});

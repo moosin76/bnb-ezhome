@@ -16,14 +16,14 @@
         v-model="form.wr_category"
         :items="config.bo_category"
         :rules="[rules.require({ label: '카데고리' })]"
-				:readonly="!!parentItem"
+        :readonly="!!parentItem"
       ></v-select>
       <template v-if="!member">
         <v-text-field
           label="이름"
           v-model="form.wr_name"
           :readonly="!!form.wr_id"
-          :rules="ruels.name()"
+          :rules="rules.name()"
         />
         <v-text-field
           label="이메일"
@@ -33,7 +33,7 @@
         <input-password
           label="비밀번호"
           v-model="form.wr_password"
-          :rules="rules.password()"
+          :rules="rules.password({ required: !id })"
         />
         <input-password
           label="비밀번호 확인"
@@ -42,16 +42,16 @@
         />
       </template>
 
-			<v-expansion-panels v-if="parentItem">
-				<v-expansion-panel>
-					<v-expansion-panel-header>
-						부모글 : {{parentItem.wr_title}}
-					</v-expansion-panel-header>
-					<v-expansion-panel-content>
-						<ez-tiptap v-model="parentItem.wr_content" :editable="false"/>
-					</v-expansion-panel-content>
-				</v-expansion-panel>
-			</v-expansion-panels>
+      <v-expansion-panels v-if="parentItem">
+        <v-expansion-panel>
+          <v-expansion-panel-header>
+            부모글 : {{ parentItem.wr_title }}
+          </v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <ez-tiptap v-model="parentItem.wr_content" :editable="false" />
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
 
       <v-text-field
         label="제목"
@@ -134,7 +134,7 @@ export default {
       loading: false,
       upImages: [],
       isWrite: false, // 작성을 했는지 여부
-			parentItem : null, // 부모글
+      parentItem: null, // 부모글
     };
   },
   computed: {
@@ -173,17 +173,20 @@ export default {
         const data = await this.$axios.get(
           `/api/board/read/${this.table}/${this.id}`
         );
-        if (this.pid) { // 부모글의 답글
+        if (this.pid) {
+          // 부모글의 답글
           this.initForm();
-					this.form.wr_category = data.wr_category; // 부모글의 카데고리를 따라감
-					this.parentItem = data;
-        } else { // 수정
+          this.form.wr_category = data.wr_category; // 부모글의 카데고리를 따라감
+          this.parentItem = data;
+        } else {
+          // 수정
           this.form = data;
         }
-      } else { // 새글
+        this.form.wr_password = "";
+      } else {
+        // 새글
         this.initForm();
       }
-      //	console.log(this.form);
     },
     initForm() {
       const form = {
@@ -229,6 +232,7 @@ export default {
       this.$refs.form.validate();
       await this.$nextTick();
       if (!this.valid) return;
+
       this.loading = true;
 
       const formData = new FormData();
@@ -240,6 +244,11 @@ export default {
         } else {
           formData.append(key, this.form[key]);
         }
+      }
+
+      // 작성시 토큰있는경우 토큰을 삽입
+      if (this.$route.query.token) {
+        formData.append("token", this.$route.query.token);
       }
 
       let cnt = 0;
@@ -254,7 +263,7 @@ export default {
       formData.append("upImages", JSON.stringify(this.upImages));
 
       let wr_id;
-      if (this.id && !this.pid ) {
+      if (this.id && !this.pid) {
         wr_id = await this.update(formData);
       } else {
         wr_id = await this.insert(formData);

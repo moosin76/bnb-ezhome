@@ -3,8 +3,10 @@ const router = require('express').Router();
 const { isGrant, LV } = require('../../util/level');
 const { modelCall, getIp } = require('../../util/lib');
 const boardModel = require('./_model/boardModel');
+const jwt = require('../plugins/jwt');
 
-async function isModify(config, member, wrItem) {
+async function isModify(req, config, member, wrItem) {
+	console.log("token", wrItem.token, req.session.checkToken);
 	let msg = '수정권한이 없습니다.';
 	if (member) {
 		if (member.mb_level >= LV.SUPER || member.mb_id == wrItem.mb_id) {
@@ -12,8 +14,14 @@ async function isModify(config, member, wrItem) {
 		}
 	} else { // 비회원
 		// 세션에다가 비밀번호
-		// TODO : 비밀번호가 맞는지
+		if (typeof (wrItem.token) === 'string' &&
+			wrItem.token === req.session.checkToken) {
+			msg = '';
+		}
 	}
+
+	delete wrItem.token;
+	req.session.checkToken = '';
 	return msg;
 }
 
@@ -67,7 +75,7 @@ router.put('/write/:bo_table/:wr_id', async (req, res) => {
 	data.wr_ip = getIp(req);
 	// 권한확인
 	const config = await modelCall(boardModel.getConfig, bo_table);
-	const modifyMsg = await isModify(config, req.user, data);
+	const modifyMsg = await isModify(req, config, req.user, data);
 
 	if (modifyMsg) { // 에러메시지가 있으면 에러
 		return res.json({ err: modifyMsg });
@@ -128,7 +136,23 @@ router.get('/download/:bo_table/:filename', async (req, res) => {
 router.delete('/:bo_table/:wr_id', async (req, res) => {
 	const { bo_table, wr_id } = req.params;
 	const { token } = req.query;
-	res.json({bo_table, wr_id, token});
+	res.json({ bo_table, wr_id, token });
+})
+
+router.post('/check/:bo_table/:wr_id', async (req, res) => {
+	const { bo_table, wr_id } = req.params;
+	const { password } = req.body;
+
+	// console.log("checkToke", req.session.checkToken);
+
+	const cnt = await modelCall(boardModel.checkItem, bo_table, wr_id, password);
+	if (cnt == 1) {
+		const token = jwt.getRandToken(16);
+		req.session.checkToken = token;
+		res.json({ token });
+	} else {
+		res.json({ err: '비밀번호가 올바르지 않습니다.' });
+	}
 })
 
 module.exports = router;

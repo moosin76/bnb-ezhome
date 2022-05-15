@@ -58,6 +58,16 @@
             icon="mdi-pencil"
           />
           <!-- TODO: 비회원 계시물 수정 버튼 -->
+          <modify-button
+            v-if="isModify == 'NO_MEMBER'"
+            color="info"
+            :table="table"
+            :wr_id="item.wr_id"
+            label="수정"
+            @onValid="modifyItem"
+          >
+            <v-icon left>mdi-pencil</v-icon>수정
+          </modify-button>
 
           <!-- // 수정 -->
 
@@ -103,6 +113,9 @@
           />
         </v-col>
       </v-card-actions>
+
+			<comment-list :id="item.wr_id" :table="table" :access="access"/>
+
     </v-card>
   </v-container>
 </template>
@@ -116,6 +129,8 @@ import TagView from "./component/TagView.vue";
 import FileDownload from "./component/FileDownload.vue";
 import BoardButton from "./component/boardButton.vue";
 import DisplayGood from "./component/DisplayGood.vue";
+import ModifyButton from "./component/ModifyButton.vue";
+import CommentList from "./component/CommentList.vue";
 
 export default {
   components: {
@@ -125,7 +140,9 @@ export default {
     FileDownload,
     BoardButton,
     DisplayGood,
-  },
+    ModifyButton,
+    CommentList
+},
   name: "BasicRead",
   props: {
     config: Object,
@@ -178,7 +195,7 @@ export default {
     ...mapMutations("board", ["SET_READ"]),
     ...mapActions("board", ["getBoardRead"]),
     async fetchData() {
-      console.log("FETCH", this.id);
+      // console.log("FETCH", this.id);
       const headers = {};
       if (this.$ssrContext) {
         headers.token = this.$ssrContext.token;
@@ -205,6 +222,11 @@ export default {
       }
 
       this.delelteLoading = false;
+    },
+    modifyItem(token) {
+      this.$router.push(
+        `/board/${this.table}/${this.item.wr_id}?act=write&token=${token}`
+      );
     },
   },
 };

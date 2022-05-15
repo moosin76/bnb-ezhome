@@ -54,7 +54,7 @@ export default {
     },
     curSkin() {
       if (this.config) {
-        // console.log("action", this.action, this.access);
+        console.log("action", this.action, this.access);
         const prefix = upperFirst(this.config.bo_skin);
         if (this.action == "list" && this.access.list) {
           return `${prefix}List`;

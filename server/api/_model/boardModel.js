@@ -171,7 +171,13 @@ WHERE wr_reply=${data.wr_reply} AND wr_grp=${parent.wr_grp} AND wr_order >= ${da
 
 		// 데이터 정리
 		delete data.wr_createat; // 생성일 삭제
-		delete data.wr_password; // 비밀번호 삭제
+
+		if (data.wr_password) { // 새로운 비밀번호가 있으면
+			data.wr_password = jwt.generatePassword(data.wr_password);
+		} else {
+			delete data.wr_password; // 비밀번호 삭제
+		}
+
 		data.wr_updateat = moment().format('LT');
 		data.wr_summary = getSummary(data.wr_content, 250);
 		delete data.good;
@@ -201,8 +207,8 @@ WHERE wr_reply=${data.wr_reply} AND wr_grp=${parent.wr_grp} AND wr_order >= ${da
 	async getList(bo_table, config, options, member) {
 		const table = `${TABLE.VIEW}${bo_table}`;
 
-		options.sortBy=[];
-		options.sortDesc=[];
+		options.sortBy = [];
+		options.sortDesc = [];
 		for (const sort of config.bo_sort) {
 			options.sortBy.push(sort.by);
 			options.sortDesc.push(sort.desc == 1);
@@ -231,12 +237,12 @@ WHERE wr_reply=${data.wr_reply} AND wr_grp=${parent.wr_grp} AND wr_order >= ${da
 		// 게시물 태그들
 		item.wrTags = await tagModel.getTags(bo_table, wr_id);
 		//  좋아요 
-		if(member) {
+		if (member) {
 			item.goodFlag = await goodModel.getFlag(bo_table, wr_id, member.mb_id);
 		} else {
 			item.goodFlag = 0;
 		}
-		
+
 
 		delete item.wr_password;
 		return item;
@@ -259,6 +265,15 @@ WHERE wr_reply=${data.wr_reply} AND wr_grp=${parent.wr_grp} AND wr_order >= ${da
 			}
 		}
 		return { wrImgs, wrFiles };
+	},
+	async checkItem(bo_table, wr_id, password) {
+		const wr_password = jwt.generatePassword(password);
+		const table = `${TABLE.WRITE}${bo_table}`;
+		const sql = sqlHelper.SelectSimple(table, {
+			wr_id, wr_password
+		}, ['COUNT(*) AS cnt']);
+		const [[{ cnt }]] = await db.execute(sql.query, sql.values);
+		return cnt;
 	}
 };
 

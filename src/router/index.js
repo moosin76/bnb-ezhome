@@ -51,10 +51,13 @@ export function createRouter() {
 			// 접근 차단
 			if ($toast) $toast.error(msg);
 			if ($Progress) $Progress.fail();
-			if(from.name) { // 이전 경로가 있으면 라우팅을 동작하지 않고
-				next(false);
+			if (from.name) { // 이전 경로가 있으면 라우팅을 동작하지 않고
+				return isMember ? next('/') : next(false);
 			} else { // 이전 경로가 없으면 홈으로 이동 또는 로그인 페이지로 보내도 됨
-				next('/');
+				return isMember ? next('/') : next({
+					name: 'NoAuthLogin',
+					query: { next: to.fullPath }
+				});
 			}
 		} else {
 			// 통과
