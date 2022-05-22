@@ -82,17 +82,24 @@ const boardModel = {
 	},
 	async writeInsert(bo_table, data, files) {
 		// 에디터에서 업로드 한 이미지 목록
-		const upImages = JSON.parse(data.upImages);
-		delete data.upImages;
+		let upImages = [];
+		if (data.upImages) {
+			upImages = JSON.parse(data.upImages);
+			delete data.upImages;
+		}
+
 		// 태그 목록
-		const wrTags = JSON.parse(data.wrTags);
-		delete data.wrTags;
+		let wrTags = [];
+		if (data.wrTags) {
+			wrTags = JSON.parse(data.wrTags);
+			delete data.wrTags;
+		}
 		// 게시판 테이블 명
 		const table = `${TABLE.WRITE}${bo_table}`;
 
 		// 게시판 글에 대한 그룹,정렬,깊이
 		if (data.wr_parent == 0) { // 새글
-			const grpQuery = `SELECT MAX(wr_grp) AS wr_grp FROM ${table}`;
+			const grpQuery = `SELECT MAX(wr_grp) AS wr_grp FROM ${table} WHERE wr_reply=${data.wr_reply}`;
 			const [[{ wr_grp }]] = await db.execute(grpQuery);
 			data.wr_grp = wr_grp ? wr_grp + 1 : 1;
 			data.wr_order = 0;
@@ -144,8 +151,11 @@ WHERE wr_reply=${data.wr_reply} AND wr_grp=${parent.wr_grp} AND wr_order >= ${da
 		delete data.wr_id;
 
 		// 기존 첨부파일
-		const wrFiles = JSON.parse(data.wrFiles);
-		delete data.wrFiles;
+		let wrFiles = [];
+		if (data.wrFiles) {
+			wrFiles = JSON.parse(data.wrFiles);
+			delete data.wrFiles;
+		}
 
 		// 기존 첨부파일에서 삭제가 참인거
 		for (const wrFile of wrFiles) {
@@ -164,9 +174,13 @@ WHERE wr_reply=${data.wr_reply} AND wr_grp=${parent.wr_grp} AND wr_order >= ${da
 		}
 
 		// 에디터에서 이미지 처리
-		const upImages = JSON.parse(data.upImages).concat(JSON.parse(data.wrImgs));
-		delete data.upImages;
-		delete data.wrImgs;
+		let upImages =[];
+		if(data.upImages && data.wrImgs) {
+			upImages = JSON.parse(data.upImages).concat(JSON.parse(data.wrImgs));
+			delete data.upImages;
+			delete data.wrImgs;
+		}
+		
 		await boardModel.clearImages(bo_table, wr_id, data.wr_content, upImages);
 
 		// 데이터 정리
@@ -186,8 +200,12 @@ WHERE wr_reply=${data.wr_reply} AND wr_grp=${parent.wr_grp} AND wr_order >= ${da
 		delete data.goodFlag;
 
 		// 태그
-		const wrTags = JSON.parse(data.wrTags);
-		delete data.wrTags;
+		let wrTags = [];
+		if(data.wrTags) {
+			wrTags = JSON.parse(data.wrTags);
+			delete data.wrTags;
+		}
+		
 		await tagModel.registerTags(bo_table, wr_id, wrTags);
 
 		const sql = sqlHelper.Update(table, data, { wr_id });
