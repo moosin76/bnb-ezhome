@@ -15,8 +15,15 @@
         :table="table"
         :access="access"
         @onInComment="inComment"
-				@onUpdate="updateItem"
+        @onUpdate="updateItem"
+        @onRemove="removeItem"
       />
+      <v-list-item v-if="loading">
+        <v-list-item-content>
+          <v-progress-circular :value="20" indeterminate />
+        </v-list-item-content>
+      </v-list-item>
+      <div v-else v-intersect="onIntersect"></div>
     </v-list>
   </v-card-text>
 </template>
@@ -39,7 +46,7 @@ export default {
       totalItems: 0,
       options: {
         itemsPerPage: 5,
-        page: 1,
+        limitStart: 0,
         sortBy: ["wr_grp", "wr_order"],
         sortDesc: [false, true],
         stf: ["wr_reply"],
@@ -64,31 +71,53 @@ export default {
         this.setData(data);
       }
 
+      // setTimeout(() => {
       this.loading = false;
+      // }, 3000);
     },
     setData(data) {
-      this.items = data.items;
+      this.items = [...this.items, ...data.items];
       this.totalItems = data.totalItems;
+      this.options.limitStart += this.options.itemsPerPage; // 다음 가지고 올 위치
     },
     updateItem(item) {
-      const find = this.items.find(p=> p.wr_id == item.wr_id);
+      const find = this.items.find((p) => p.wr_id == item.wr_id);
       if (find) {
         // 수정
-				const idx = this.items.indexOf(find);
-				this.items.splice(idx, 1, item);
+        const idx = this.items.indexOf(find);
+        this.items.splice(idx, 1, item);
       } else {
         // 신규
         this.items.unshift(item);
         this.totalItems++;
+        this.options.limitStart++; // 다음 가지고올 인덱스
       }
     },
     inComment(parent, item) {
-			console.log("inComment",parent, item);
+      // 코멘트 답글 추가
+      // console.log("inComment",parent, item);
       const find = this.items.find((item) => item.wr_id == parent.wr_id);
       if (find) {
         const idx = this.items.indexOf(find);
-        this.items.splice(idx+1, 0, item);
+        this.items.splice(idx + 1, 0, item);
         this.totalItems++;
+        this.options.limitStart++; // 다음 가지고올 인덱스
+      }
+    },
+    onIntersect(entries, observer) {
+      if (this.items.length < this.totalItems) {
+        if (entries[0].isIntersecting) {
+          // console.log("onIntersect", this.options);
+          this.fetchData();
+        }
+      }
+    },
+    removeItem(item, cnt) {
+      const idx = this.items.indexOf(item);
+      if (idx >= 0) {
+        this.items.splice(idx, cnt);
+        this.totalItems -= cnt;
+        this.options.limitStart -= cnt;
       }
     },
   },

@@ -61,7 +61,7 @@ router.post('/write/:bo_table', async (req, res) => {
 	const config = await modelCall(boardModel.getConfig, bo_table);
 	// return res.json({err : '작업중', data});
 
-	if(data.wr_reply == 0) {
+	if (data.wr_reply == 0) {
 		const grant = isGrant(req, config.bo_write_level);
 		if (!grant) {
 			return res.json({ err: '게시물 작성 권한이 없습니다.' });
@@ -74,18 +74,18 @@ router.post('/write/:bo_table', async (req, res) => {
 	}
 
 	const result = await modelCall(boardModel.writeInsert, bo_table, data, req.files);
-	if(data.wr_reply > 0) { // 코멘트 니깐 내용을 주자
+	if (data.wr_reply > 0) { // 코멘트 니깐 내용을 주자
 		const options = {
 			stf: ['wr_id'],
-			stc : ['eq'],
-			stx : [result.wr_id]
+			stc: ['eq'],
+			stx: [result.wr_id]
 		};
 		const item = await modelCall(boardModel.getList, bo_table, config, options, req.user);
 		res.json(item.items[0]);
 	} else {
 		res.json(result);
 	}
-	
+
 });
 
 // 게시물 수정
@@ -102,12 +102,12 @@ router.put('/write/:bo_table/:wr_id', async (req, res) => {
 	}
 
 	const result = await modelCall(boardModel.writeUpdate, bo_table, wr_id, data, req.files);
-	
-	if(data.wr_reply > 0) { // 코멘트 니깐 내용을 주자
+
+	if (data.wr_reply > 0) { // 코멘트 니깐 내용을 주자
 		const options = {
 			stf: ['wr_id'],
-			stc : ['eq'],
-			stx : [result.wr_id]
+			stc: ['eq'],
+			stx: [result.wr_id]
 		};
 		const item = await modelCall(boardModel.getList, bo_table, config, options, req.user);
 		res.json(item.items[0]);
@@ -165,10 +165,24 @@ router.get('/download/:bo_table/:filename', async (req, res) => {
 	res.download(srcFile, filename);
 });
 
+// 삭제
 router.delete('/:bo_table/:wr_id', async (req, res) => {
 	const { bo_table, wr_id } = req.params;
 	const { token } = req.query;
-	res.json({ bo_table, wr_id, token });
+	// 게시판 설정
+	const config = await modelCall(boardModel.getConfig, bo_table);
+	// 게시물 가지고오고
+	const data = await modelCall(boardModel.getItem, bo_table, wr_id, req.user);
+	// 권한 확인하고
+	data.token = token;
+	const modifyMsg = await isModify(req, config, req.user, data);
+
+	if (modifyMsg) { // 에러메시지가 있으면 에러
+		return res.json({ err: modifyMsg });
+	}
+	// !!삭제
+	const result = await modelCall(boardModel.deleteItem, bo_table, wr_id, req.user);
+	res.json(result);
 })
 
 router.post('/check/:bo_table/:wr_id', async (req, res) => {
