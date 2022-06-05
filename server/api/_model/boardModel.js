@@ -353,6 +353,13 @@ WHERE wr_reply=${data.wr_reply} AND wr_grp=${parent.wr_grp} AND wr_order >= ${da
 		const [rows] = await db.execute(sql.query, sql.values);
 
 		return rows.affectedRows;
+	},
+	async viewUp(bo_table, wr_id) {
+		const table = `${TABLE.WRITE}${bo_table}`;
+		const query = `UPDATE ${table} SET wr_view=wr_view+1 WHERE wr_id=?`;
+		const values = [wr_id];
+		const [rows] = await db.execute(query, values);
+		return rows.affectedRows;
 	}
 };
 

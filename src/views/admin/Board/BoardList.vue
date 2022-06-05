@@ -16,12 +16,30 @@
       :loading="loading"
       class="elevation-1"
     >
-			<template v-slot:item.cmd="{item}">
-				<v-btn icon :to="`/adm/board/form/${item.bo_table}`">
-					<v-icon>mdi-pencil</v-icon>
-				</v-btn>
-			</template>
-		</v-data-table>
+      <template v-slot:item.bo_subject="{ item }">
+        <v-btn
+          :to="`/board/${item.bo_table}`"
+          text
+          class="ma-0 pa-0 justify-start"
+        >
+          {{ item.bo_subject }}
+        </v-btn>
+      </template>
+
+      <template v-slot:item.cmd="{ item }">
+        <v-btn icon :to="`/adm/board/form/${item.bo_table}`">
+          <v-icon>mdi-pencil</v-icon>
+        </v-btn>
+        <v-btn
+          v-if="isSuper"
+          icon
+          @click="removeBoard(item)"
+          :loading="btnLoading"
+        >
+          <v-icon>mdi-delete</v-icon>
+        </v-btn>
+      </template>
+    </v-data-table>
   </v-container>
 </template>
 
@@ -29,6 +47,7 @@
 import qs from "qs";
 import { deepCopy } from "../../../../util/lib";
 import TooltipBtn from "../../../components/etc/TooltipBtn.vue";
+import { mapGetters } from "vuex";
 export default {
   components: { TooltipBtn },
   name: "AdmBoardList",
@@ -48,7 +67,11 @@ export default {
       options: {},
       totalItems: 0,
       loading: false,
+      btnLoading: false,
     };
+  },
+  computed: {
+    ...mapGetters("user", ["isSuper"]),
   },
   watch: {
     options: {
@@ -72,6 +95,25 @@ export default {
         this.totalItems = data.totalItems;
       }
       this.loading = false;
+    },
+    async removeBoard(item) {
+      const result = await this.$ezNotify.confirm(
+        `[ ${item.bo_subject} ] 게시판을 삭제 하시겠습니까?`,
+        "게시판 삭제",
+        { icon: "mdi-alert" }
+      );
+      if (!result) return;
+
+      // TODO: 서버에 요청하면 됩니다.
+      this.btnLoading = true;
+      const data = await this.$axios.delete(`/api/adm/board/${item.bo_table}`);
+      this.btnLoading = false;
+      if (data) {
+        this.$toast.info(
+          `${item.bo_subject} 게시판 삭제됨 (파일:${data.fileCnt}, 태그:${data.tagCnt}, 좋아요${data.goodCnt})`
+        );
+        this.getDataFromApi();
+      }
     },
   },
 };

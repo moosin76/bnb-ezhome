@@ -116,6 +116,13 @@ router.put('/write/:bo_table/:wr_id', async (req, res) => {
 	}
 })
 
+// 조회수 증가
+router.put('/view/:bo_table/:wr_id', async(req, res)=>{
+	const {bo_table, wr_id} = req.params;
+	const result = await modelCall(boardModel.viewUp, bo_table, wr_id);
+	res.json(result);
+})
+
 // 게시판 목록 반환
 router.get('/list/:bo_table', async (req, res) => {
 

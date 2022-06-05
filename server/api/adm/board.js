@@ -27,4 +27,9 @@ router.put('/:bo_table', async(req, res)=>{
 	res.json(result);
 })
 
+router.delete('/:bo_table', async(req, res)=>{
+	const result = await modelCall(admBoardModel.removeBoard, req);
+	res.json(result);
+})
+
 module.exports = router;

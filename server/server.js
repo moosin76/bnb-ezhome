@@ -11,6 +11,10 @@ require('./plugins/pm2Bus');
 	const port = process.env.VUE_APP_SERVER_PORT || 3000;
 	const webServer = http.createServer(app);
 
+	// 로거
+	const logger = require('./plugins/logger');
+	global.$logger = logger;
+
 	const socket = require('./plugins/socket');
 	socket(webServer);
 
@@ -117,9 +121,10 @@ require('./plugins/pm2Bus');
 		const stream = renderer.renderToStream(ctx);
 		stream.on('end', ()=>{
 			const memSize = Object.entries(process.memoryUsage())[0][1];
-			console.log("스트림 렌더 종료", (memSize/ 1024 / 1024).toFixed(4));
+			$logger.info("스트림 렌더 종료", (memSize/ 1024 / 1024).toFixed(4));
 			if(process.platform == 'linux') {
 				if(memSize > 150000000) {
+					$logger.info('서버 재시작');
 					process.emit('SIGINT');
 				}
 			} 
@@ -129,7 +134,7 @@ require('./plugins/pm2Bus');
 	// 서버 응답
 	webServer.listen(port, () => {
 		process.send('ready');
-		console.log(`http://localhost:${port}`);
+		$logger.info(`http://localhost:${port} 서버 시작`);
 	});
 
 	process.on('SIGINT', function() {
