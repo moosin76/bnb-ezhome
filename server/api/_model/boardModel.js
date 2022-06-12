@@ -243,6 +243,10 @@ WHERE wr_reply=${data.wr_reply} AND wr_grp=${parent.wr_grp} AND wr_order >= ${da
 			} else {
 				item.goodFlag = 0;
 			}
+			// 이미지 목록
+			const files = await boardModel.getItemFiles(bo_table, item.wr_id, item.wr_content);
+			item.wrImgs = files.wrImgs;
+			item.wrFiles = files.wrFiles;
 		}
 
 		const [[{ totalItems }]] = await db.execute(sql.countQuery, sql.values);

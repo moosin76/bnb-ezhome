@@ -74,6 +74,7 @@ export default {
   watch: {
     table() {
       // this.config = null;
+			console.log("watch table ", this.table);
       this.getBoardConfig(this.table);
     },
   },
@@ -87,7 +88,13 @@ export default {
       this.getBoardConfig(this.table);
     }
   },
+	destroyed() {
+		this.SET_CONFIG(null);
+		this.SET_LIST({items:[], totalItems:0});
+		this.SET_READ(null);
+	},
   methods: {
+		...mapMutations("board", ['SET_CONFIG', 'SET_LIST', 'SET_READ']),
     ...mapActions("board", ["getBoardConfig"]),
   },
 };
