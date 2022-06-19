@@ -75,3 +75,21 @@
     max-width: calc(100vw - 120px);
   }
 }
+
+/* 갤러리 게시판 */
+.gal-item .v-image__image {
+	transition: all 0.4s;
+}
+.gal-item:hover .v-image__image { 
+	transform: scale(1.2, 1.2);
+	opacity: 0.8;
+}
+
+/* 스크롤 바 */
+::-webkit-scrollbar{width: 12px;}
+::-webkit-scrollbar-track {background-color: #dee2e6;}
+::-webkit-scrollbar-thumb {background-color: #495057;
+	background-clip: padding-box;
+	border-left: 1px solid transparent;
+	border-right: 1px solid transparent;}
+::-webkit-scrollbar-thumb:hover {background-color: #343a40;}

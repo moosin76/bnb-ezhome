@@ -196,7 +196,7 @@ export default {
         wr_email: this.member ? this.member.mb_email : "",
         wr_name: this.member ? this.member.mb_name : "",
         wr_password: "",
-        wr_category: this.$route.query.ca || this.config.bo_category[0], // TODO: 링크할때 카데고리 정보를 넘긴다
+        wr_category: this.$route.query.ca || this.config.bo_category[0] || "",  // TODO: 링크할때 카데고리 정보를 넘긴다
         wr_title: "",
         wr_content: "",
         wrTags: [],

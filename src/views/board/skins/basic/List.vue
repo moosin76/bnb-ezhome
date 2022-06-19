@@ -79,7 +79,7 @@
 <script>
 import qs from "qs";
 import { deepCopy } from "../../../../../util/lib";
-import { mapActions, mapState } from "vuex";
+import { mapActions, mapState, mapMutations } from "vuex";
 import SearchField from "../../../../components/layout/SearchField.vue";
 import CateSelect from "./component/CateSelect.vue";
 import DisplayTime from "./component/DisplayTime.vue";

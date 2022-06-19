@@ -125,7 +125,6 @@ router.put('/view/:bo_table/:wr_id', async(req, res)=>{
 
 // 게시판 목록 반환
 router.get('/list/:bo_table', async (req, res) => {
-
 	const { bo_table } = req.params;
 	// console.log("GET list ==>> " +bo_table);
 	// 권한 확인
@@ -139,6 +138,26 @@ router.get('/list/:bo_table', async (req, res) => {
 	const result = await modelCall(boardModel.getList, bo_table, config, options, req.user);
 	res.json(result);
 });
+
+// 최근계시물 
+router.get('/latest/:bo_table', async(req, res)=> {
+	const {bo_table} = req.params;
+	const {limit} = req.query;
+	const config = await modelCall(boardModel.getConfig, bo_table);
+	const options = {
+		page : 1,
+		itemsPerPage : limit,
+		stf : ['wr_reply', 'wr_parent'],
+		stc : ['eq', 'eq'],
+		stx : ['0', '0']
+	}
+	const result = await modelCall(boardModel.getList, bo_table, config, options, req.user);
+	// {items, totalItems}
+	result.subject = config.bo_subject;
+	delete result.totalItems;
+	res.json(result);
+})
+
 
 // 해당 게시물 아이디 내용 반환
 router.get('/read/:bo_table/:wr_id', async (req, res) => {

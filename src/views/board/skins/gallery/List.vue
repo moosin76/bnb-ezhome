@@ -46,7 +46,8 @@
             @click="$router.push(`/board/${table}/${item.wr_id}`)"
             class="text-decoration-none"
           >
-            <v-img :src="getImage(item)" :aspect-ratio="1"> </v-img>
+            <v-img :src="getImage(table, item, imgSize)" :aspect-ratio="1">
+            </v-img>
           </a>
           <div class="d-flex justify-space-between align-center ml-4">
             <div style="color: white">
@@ -78,7 +79,7 @@
 
 <script>
 import qs from "qs";
-import { deepCopy } from "../../../../../util/lib";
+import { deepCopy, getImage } from "../../../../../util/lib";
 import { mapActions, mapMutations, mapState } from "vuex";
 import SearchField from "../../../../components/layout/SearchField.vue";
 import CateSelect from "./component/CateSelect.vue";
@@ -189,6 +190,7 @@ export default {
     pageCount() {
       return Math.ceil(this.totalItems / this.options.itemsPerPage);
     },
+    getImage: () => getImage,
   },
   watch: {
     options: {
@@ -273,28 +275,6 @@ export default {
       const { page, itemsPerPage } = this.options;
       const { totalItems } = this;
       return totalItems - (page - 1) * itemsPerPage - index;
-    },
-    getImage(item) {
-      // 본문에 업로드된 이미지
-      if (item.wrImgs.length) {
-        return `/upload/${this.table}/${item.wrImgs[0].bf_src}?w=${this.imgSize.w}&h=${this.imgSize.h}`;
-      }
-      // 첨부파일에 업로드된 이미지
-      if (item.wrFiles.length) {
-        for (const file of item.wrFiles) {
-          if (file.bf_type.startsWith("image")) {
-            return `/upload/${this.table}/${file.bf_src}?w=${this.imgSize.w}&h=${this.imgSize.h}`;
-          }
-        }
-      }
-      // URL 링크로 올린 이미지
-      const pattern = /<img[^>]*src=\"([^\"]+)\"[^>]*>/;
-      const matchs = item.wr_content.match(pattern);
-      if (matchs) {
-        return matchs[1];
-      }
-      // 없으면 기본이미지
-      return "/img/noimage.png";
     },
   },
 };

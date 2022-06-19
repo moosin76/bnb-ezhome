@@ -249,6 +249,8 @@ WHERE wr_reply=${data.wr_reply} AND wr_grp=${parent.wr_grp} AND wr_order >= ${da
 			item.wrFiles = files.wrFiles;
 		}
 
+		// console.log(items);
+
 		const [[{ totalItems }]] = await db.execute(sql.countQuery, sql.values);
 
 		return { items, totalItems };
