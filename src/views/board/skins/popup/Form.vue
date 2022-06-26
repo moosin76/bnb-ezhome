@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <v-container fluid>
     <v-toolbar>
       <v-toolbar-title>{{ pageTitle }}</v-toolbar-title>
       <v-spacer />
@@ -10,55 +10,61 @@
     </v-toolbar>
 
     <v-form v-if="form" ref="form" v-model="valid" lazy-validation>
-      <v-select
-        v-if="config.bo_use_category"
-        label="카데고리"
-        v-model="form.wr_category"
-        :items="config.bo_category"
-        :rules="[rules.require({ label: '카데고리' })]"
-				:readonly="!!parentItem"
-      ></v-select>
-      <template v-if="!member">
-        <v-text-field
-          label="이름"
-          v-model="form.wr_name"
-          :readonly="!!form.wr_id"
-          :rules="ruels.name()"
-        />
-        <v-text-field
-          label="이메일"
-          v-model="form.wr_email"
-          :rules="rules.email()"
-        />
-        <input-password
-          label="비밀번호"
-          v-model="form.wr_password"
-          :rules="rules.password()"
-        />
-        <input-password
-          label="비밀번호 확인"
-          v-model="confimPw"
-          :rules="[rules.matchValue(form.wr_password)]"
-        />
-      </template>
-
-			<v-expansion-panels v-if="parentItem">
-				<v-expansion-panel>
-					<v-expansion-panel-header>
-						부모글 : {{parentItem.wr_title}}
-					</v-expansion-panel-header>
-					<v-expansion-panel-content>
-						<ez-tiptap v-model="parentItem.wr_content" :editable="false"/>
-					</v-expansion-panel-content>
-				</v-expansion-panel>
-			</v-expansion-panels>
-
       <v-text-field
-        label="제목"
+        label="팝업 제목"
         v-model="form.wr_title"
         counter="120"
         :rules="[rules.require({ label: '제목' })]"
       />
+
+      <div class="d-flex align-center">
+        <div>선택시 몇일동안 팝업을 보여주지 않음</div>
+        <v-radio-group v-model="form.wr_1" row class="ml-4">
+          <v-radio label="1일" value="1"></v-radio>
+          <v-radio label="3일" value="3"></v-radio>
+          <v-radio label="7일" value="7"></v-radio>
+        </v-radio-group>
+        <v-spacer></v-spacer>
+        <v-checkbox
+          v-model="form.wr_9"
+          label="사용유무"
+          true-value="1"
+          false-value="0"
+        ></v-checkbox>
+      </div>
+
+      <date-time-picker v-model="form.wr_2" label="시작 일시" />
+      <date-time-picker v-model="form.wr_3" label="종료 일시" />
+      <div class="d-flex">
+        <v-text-field
+          label="top"
+          v-model="form.wr_5"
+          suffix="px"
+          :rules="[rules.require({ label: 'top' })]"
+        ></v-text-field>
+        <v-text-field
+          label="left"
+          v-model="form.wr_6"
+          suffix="px"
+          class="ml-4"
+          :rules="[rules.require({ label: 'left' })]"
+        ></v-text-field>
+        <v-text-field
+          label="width"
+          v-model="form.wr_7"
+          suffix="px"
+          class="ml-4"
+          :rules="[rules.require({ label: 'width' })]"
+        ></v-text-field>
+        <v-text-field
+          label="height"
+          v-model="form.wr_8"
+          suffix="px"
+          class="ml-4"
+          :rules="[rules.require({ label: 'height' })]"
+        ></v-text-field>
+      </div>
+      <v-text-field label="링크" v-model="form.wr_4"></v-text-field>
 
       <ez-tiptap
         :editable="true"
@@ -66,24 +72,14 @@
         @uploadImage="uploadImage"
       />
 
-      <v-combobox
-        label="검색태그"
-        v-model="form.wrTags"
-        :items="tags"
-        multiple
-        chips
-        deletable-chips
-        hide-selected
-      />
-
-      <div v-for="(item, i) in config.wr_fields" :key="i">
+      <!-- <div v-for="(item, i) in config.wr_fields" :key="i">
         <v-text-field
           v-if="item.title"
           :label="item.title"
           v-model="form[`wr_${i + 1}`]"
           :rules="item.required ? [rules.require({ label: item.title })] : []"
         />
-      </div>
+      </div> -->
 
       <div v-for="i in config.bo_upload_cnt" class="d-flex">
         <v-file-input
@@ -112,9 +108,10 @@
 import { mapState } from "vuex";
 import validateRules from "../../../../../util/validateRules";
 import InputPassword from "../../../../components/InputForms/InputPassword.vue";
+import DateTimePicker from "./component/DateTimePicker.vue";
 
 export default {
-  components: { InputPassword },
+  components: { InputPassword, DateTimePicker },
   name: "BasicForm",
   title() {
     return this.pageTitle;
@@ -134,7 +131,7 @@ export default {
       loading: false,
       upImages: [],
       isWrite: false, // 작성을 했는지 여부
-			parentItem : null, // 부모글
+      parentItem: null, // 부모글
     };
   },
   computed: {
@@ -173,17 +170,20 @@ export default {
         const data = await this.$axios.get(
           `/api/board/read/${this.table}/${this.id}`
         );
-        if (this.pid) { // 부모글의 답글
+        if (this.pid) {
+          // 부모글의 답글
           this.initForm();
-					this.form.wr_category = data.wr_category; // 부모글의 카데고리를 따라감
-					this.parentItem = data;
-        } else { // 수정
+          this.form.wr_category = data.wr_category; // 부모글의 카데고리를 따라감
+          this.parentItem = data;
+        } else {
+          // 수정
           this.form = data;
         }
-      } else { // 새글
+        this.form.wr_password = "";
+      } else {
+        // 새글
         this.initForm();
       }
-      //	console.log(this.form);
     },
     initForm() {
       const form = {
@@ -193,7 +193,7 @@ export default {
         wr_email: this.member ? this.member.mb_email : "",
         wr_name: this.member ? this.member.mb_name : "",
         wr_password: "",
-        wr_category: this.$route.query.ca || this.config.bo_category[0], // TODO: 링크할때 카데고리 정보를 넘긴다
+        wr_category: this.$route.query.ca || this.config.bo_category[0] || "", // TODO: 링크할때 카데고리 정보를 넘긴다
         wr_title: "",
         wr_content: "",
         wrTags: [],
@@ -203,6 +203,8 @@ export default {
       for (let i = 1; i <= 10; i++) {
         form[`wr_${i}`] = "";
       }
+      form.wr_1 = "1";
+      form.wr_9 = "1";
       this.form = form;
     },
     fileTitle(i) {
@@ -242,6 +244,11 @@ export default {
         }
       }
 
+      // 작성시 토큰있는경우 토큰을 삽입
+      if (this.$route.query.token) {
+        formData.append("token", this.$route.query.token);
+      }
+
       let cnt = 0;
       for (let i = 0; i < this.config.bo_upload_cnt; i++) {
         if (this.uploadFiles[i] != null) {
@@ -254,7 +261,7 @@ export default {
       formData.append("upImages", JSON.stringify(this.upImages));
 
       let wr_id;
-      if (this.id && !this.pid ) {
+      if (this.id && !this.pid) {
         wr_id = await this.update(formData);
       } else {
         wr_id = await this.insert(formData);
@@ -263,7 +270,7 @@ export default {
       // 글작성이 잘 끝났으면
       if (wr_id) {
         this.isWrite = true;
-        this.$router.push(`/board/${this.table}/${wr_id}`);
+        this.$router.push(`/board/${this.table}`); // 목록으로 보냄
       }
 
       this.loading = false;

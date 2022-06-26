@@ -6,10 +6,13 @@ const boardModel = require('./_model/boardModel');
 const jwt = require('../plugins/jwt');
 
 async function isModify(req, config, member, wrItem) {
-	console.log("token", wrItem.token, req.session.checkToken);
+	// console.log("token", wrItem.token, req.session.checkToken);
+	// console.log(config);
 	let msg = '수정권한이 없습니다.';
 	if (member) {
-		if (member.mb_level >= LV.SUPER || member.mb_id == wrItem.mb_id) {
+		if (config.bo_table == 'popup' && member.mb_level >= LV.ADMIN) {
+			msg = '';
+		} else if (member.mb_level >= LV.SUPER || member.mb_id == wrItem.mb_id) {
 			msg = '';
 		}
 	} else { // 비회원
@@ -117,8 +120,8 @@ router.put('/write/:bo_table/:wr_id', async (req, res) => {
 })
 
 // 조회수 증가
-router.put('/view/:bo_table/:wr_id', async(req, res)=>{
-	const {bo_table, wr_id} = req.params;
+router.put('/view/:bo_table/:wr_id', async (req, res) => {
+	const { bo_table, wr_id } = req.params;
 	const result = await modelCall(boardModel.viewUp, bo_table, wr_id);
 	res.json(result);
 })
@@ -140,16 +143,16 @@ router.get('/list/:bo_table', async (req, res) => {
 });
 
 // 최근계시물 
-router.get('/latest/:bo_table', async(req, res)=> {
-	const {bo_table} = req.params;
-	const {limit} = req.query;
+router.get('/latest/:bo_table', async (req, res) => {
+	const { bo_table } = req.params;
+	const { limit } = req.query;
 	const config = await modelCall(boardModel.getConfig, bo_table);
 	const options = {
-		page : 1,
-		itemsPerPage : limit,
-		stf : ['wr_reply', 'wr_parent'],
-		stc : ['eq', 'eq'],
-		stx : ['0', '0']
+		page: 1,
+		itemsPerPage: limit,
+		stf: ['wr_reply', 'wr_parent'],
+		stc: ['eq', 'eq'],
+		stx: ['0', '0']
 	}
 	const result = await modelCall(boardModel.getList, bo_table, config, options, req.user);
 	// {items, totalItems}

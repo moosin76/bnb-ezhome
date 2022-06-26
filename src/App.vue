@@ -43,15 +43,15 @@ export default {
   },
   socket() {
     return {
-			"connect" :() =>{
-				console.log("socket connect");
-				this.SET_ONLINE(true);
-				this.initRooms();
-			},
-			"disconnect": ()=> {
-				console.log("socket disconnect")
-				this.SET_ONLINE(false);
-			},
+      connect: () => {
+        console.log("socket connect");
+        this.SET_ONLINE(true);
+        this.initRooms();
+      },
+      disconnect: () => {
+        console.log("socket disconnect");
+        this.SET_ONLINE(false);
+      },
       "config:update": (data) => {
         this.SET_CONFIG(data);
       },
@@ -62,8 +62,8 @@ export default {
   },
   methods: {
     ...mapMutations(["SET_CONFIG"]),
-		...mapMutations('socket', ['SET_ONLINE']),
-		...mapActions('socket', ['initRooms']),
+    ...mapMutations("socket", ["SET_ONLINE"]),
+    ...mapActions("socket", ["initRooms"]),
     toggleDrawer() {
       this.drawer = !this.drawer;
     },

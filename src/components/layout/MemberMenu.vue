@@ -1,10 +1,10 @@
 <template>
   <div>
-		<!-- 회원정보 출력 -->
-		<v-card-text class="text-subtitle-1">
-			<b>{{member.mb_name}}</b>
-			({{LV_LABEL(member.mb_level)}})
-		</v-card-text>
+    <!-- 회원정보 출력 -->
+    <v-card-text class="text-subtitle-1">
+      <b>{{ member.mb_name }}</b>
+      ({{ LV_LABEL(member.mb_level) }})
+    </v-card-text>
     <!-- 관리자 메뉴 -->
     <v-list v-if="isAdmin" dense>
       <v-subheader>관리자 메뉴</v-subheader>
@@ -43,7 +43,16 @@ export default {
         { title: "설정 관리", icon: "mdi-cog", to: "/adm/config" },
         { title: "회원 관리", icon: "mdi-account-cog", to: "/adm/member" },
         { title: "메뉴 관리", icon: "mdi-menu", to: "/adm/menu" },
-				{ title: "게시판 관리", icon: "mdi-clipboard-text-multiple-outline", to: "/adm/board/list" },
+        {
+          title: "게시판 관리",
+          icon: "mdi-clipboard-text-multiple-outline",
+          to: "/adm/board/list",
+        },
+        {
+          title: "팝업 관리",
+          icon: "mdi-layers-triple-outline",
+          to: "/board/popup",
+        },
       ],
     };
   },
@@ -65,15 +74,15 @@ export default {
             }
             return;
           } else {
-            msg = `\n등급 ${LV_LABEL(
+            msg = `\n등급 ${LV_LABEL(this.member.mb_level)}(${
               this.member.mb_level
-            )}(${this.member.mb_level}) -> ${LV_LABEL(newMember.mb_level)}(${
-              newMember.mb_level
-            })`;
+            }) -> ${LV_LABEL(newMember.mb_level)}(${newMember.mb_level})`;
           }
         }
-				msg = `${newMember.mb_name}님 관리자에 의해 회원 정보가 수정되었습니다.` + msg;
-				this.$toast.info(msg);
+        msg =
+          `${newMember.mb_name}님 관리자에 의해 회원 정보가 수정되었습니다.` +
+          msg;
+        this.$toast.info(msg);
         this.SET_MEMBER(newMember);
       },
     };
@@ -83,7 +92,7 @@ export default {
       member: (state) => state.user.member,
     }),
     ...mapGetters("user", ["isAdmin", "isSuper"]),
-		LV_LABEL : () => LV_LABEL
+    LV_LABEL: () => LV_LABEL,
   },
   methods: {
     ...mapMutations("user", ["SET_MEMBER"]),
