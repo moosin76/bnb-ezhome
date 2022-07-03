@@ -228,6 +228,12 @@ router.post('/check/:bo_table/:wr_id', async (req, res) => {
 	} else {
 		res.json({ err: '비밀번호가 올바르지 않습니다.' });
 	}
+});
+
+router.get('/popup-list', async (req, res) => {
+	const { ignores } = req.query
+	const result = await modelCall(boardModel.popupList, ignores);
+	res.json(result);
 })
 
 module.exports = router;

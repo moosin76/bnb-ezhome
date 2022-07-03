@@ -52,6 +52,10 @@
         </div>
       </template>
       <template #item.cmd="{ item }">
+        <tooltip-btn label="미리보기" icon color="accent" @click="popupView(item)">
+          <v-icon>mdi-eye</v-icon>
+        </tooltip-btn>
+
         <tooltip-btn
           label="수정"
           icon
@@ -60,6 +64,7 @@
         >
           <v-icon>mdi-pencil</v-icon>
         </tooltip-btn>
+
         <tooltip-btn
           v-if="isSuper"
           label="삭제"
@@ -216,7 +221,7 @@ export default {
           align: "center",
           sortable: false,
           searchable: false,
-          width: "120",
+          width: "160",
         },
       ];
       if (this.config.bo_use_category) {
