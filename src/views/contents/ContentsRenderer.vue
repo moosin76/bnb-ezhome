@@ -7,7 +7,7 @@ import { mapActions, mapState, mapMutations } from "vuex";
 import upperFirst from "lodash/upperFirst";
 
 import SKINS from "./skins";
-import ContentsError from './ContentsError.vue';
+import ContentsError from "./ContentsError.vue";
 
 export default {
   components: { ...SKINS, ContentsError },
@@ -21,14 +21,22 @@ export default {
     ...mapState({
       item: (state) => state.board.read,
     }),
-		curSkin() {
-			if(this.item) {
-				 const prefix = upperFirst(this.item.wr_2);
-				 return `${prefix}Contents`;
-			} else {
-				return 'ContentsError';
-			}
-		}
+    curSkin() {
+      if (this.item) {
+        const prefix = upperFirst(this.item.wr_2);
+        return `${prefix}Contents`;
+      } else {
+        return "ContentsError";
+      }
+    },
+    wr_1() {
+      return this.$route.params.wr_1;
+    },
+  },
+  watch: {
+    wr_1() {
+			 this.fetchData();
+		},
   },
   serverPrefetch() {
     return this.fetchData();
@@ -52,7 +60,7 @@ export default {
         headers.token = this.$ssrContext.token;
       }
       await this.getContentsRead({
-        wr_1: this.$route.params.wr_1,
+        wr_1: this.wr_1,
         headers,
       });
     },
